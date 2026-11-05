@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:3000/api';
+const API_URL = 'https://tiger-game.onrender.com/api';
 
 async function girar() {
   const aposta = parseFloat(document.getElementById('aposta').value);
