@@ -6,7 +6,6 @@ body {
   min-height: 100vh; overflow: hidden; font-family: 'Montserrat', sans-serif;
 }
 
-/* Fundo com efeito de luz central e partículas */
 .background-effects {
   position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
   background: radial-gradient(circle at center, #8a0000 0%, #200000 70%, #050000 100%);
@@ -18,115 +17,101 @@ body {
   background: linear-gradient(180deg, rgba(160, 0, 0, 0.95) 0%, rgba(50, 0, 0, 0.98) 100%);
   border: 4px solid #f6d061; border-radius: 24px; padding: 14px;
   display: flex; flex-direction: column; justify-content: space-between; align-items: center;
-  box-shadow: 0 0 50px rgba(255, 180, 0, 0.4), inset 0 0 15px rgba(255, 215, 0, 0.3);
-  position: relative;
+  box-shadow: 0 0 50px rgba(255, 180, 0, 0.4); position: relative;
 }
 
-/* Mascote e Banner */
-.mascot-header { display: flex; flex-direction: column; align-items: center; position: relative; margin-top: -10px; }
-.tiger-container { width: 90px; height: 90px; filter: drop-shadow(0 6px 10px rgba(0,0,0,0.6)); animation: floatMascot 3s infinite ease-in-out; }
+.mascot-header { display: flex; flex-direction: column; align-items: center; position: relative; width: 100%; }
+.top-nav { display: flex; justify-content: space-between; width: 100%; gap: 10px; margin-bottom: 5px; }
+.nav-btn {
+  flex: 1; padding: 8px; border-radius: 10px; border: 1.5px solid #ffd700; font-weight: 900;
+  font-size: 0.75rem; cursor: pointer; color: #fff; text-shadow: 0 1px 2px #000;
+}
+.nav-btn.deposit { background: linear-gradient(180deg, #00b300 0%, #006600 100%); }
+.nav-btn.withdraw { background: linear-gradient(180deg, #cc8800 0%, #885500 100%); }
+
+.tiger-container { width: 80px; height: 80px; filter: drop-shadow(0 6px 10px rgba(0,0,0,0.6)); }
 .tiger-svg { width: 100%; height: 100%; }
 
-@keyframes floatMascot {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
-}
-
-.logo-banner {
-  text-align: center; margin-top: -10px;
-}
-.logo-banner span { font-family: 'Cinzel', serif; font-size: 0.9rem; color: #ffe680; letter-spacing: 3px; text-shadow: 0 2px 4px #000; }
+.logo-banner { text-align: center; margin-top: -8px; }
+.logo-banner span { font-family: 'Cinzel', serif; font-size: 0.8rem; color: #ffe680; letter-spacing: 2px; }
 .logo-banner h1 {
-  font-size: 2.2rem; font-weight: 900;
+  font-size: 2rem; font-weight: 900;
   background: linear-gradient(180deg, #fff6b3 0%, #ffcc00 50%, #d47a00 100%);
   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.8)); letter-spacing: 2px;
+  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.8));
 }
 
-/* Moldura Oriental em Dourado/Vermelho com 3D */
-.slot-machine { width: 100%; flex: 1; display: flex; align-items: center; justify-content: center; margin: 10px 0; }
+.slot-machine { width: 100%; flex: 1; display: flex; align-items: center; justify-content: center; margin: 6px 0; }
 .temple-frame {
   width: 100%; background: linear-gradient(180deg, #2b0000 0%, #150000 100%);
-  border: 6px solid #e2b43b; border-radius: 18px; padding: 10px;
+  border: 5px solid #e2b43b; border-radius: 18px; padding: 8px;
   display: flex; align-items: center; justify-content: space-between;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.8), inset 0 0 25px #000;
-  position: relative;
 }
 
-.line-indicators { display: flex; flex-direction: column; justify-content: space-around; height: 210px; }
+.line-indicators { display: flex; flex-direction: column; justify-content: space-around; height: 200px; }
 .indicator {
-  width: 22px; height: 22px; background: linear-gradient(180deg, #ff4444 0%, #990000 100%);
-  border: 1.5px solid #ffcc00; border-radius: 50%; color: #fff; font-size: 0.75rem;
+  width: 20px; height: 20px; background: linear-gradient(180deg, #ff4444 0%, #990000 100%);
+  border: 1px solid #ffcc00; border-radius: 50%; color: #fff; font-size: 0.7rem;
   display: flex; justify-content: center; align-items: center; font-weight: bold;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.5);
 }
 
-.grid-3x3 {
-  display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr);
-  gap: 8px; flex: 1; margin: 0 8px;
-}
-
+.grid-3x3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; flex: 1; margin: 0 6px; }
 .cell {
-  background: linear-gradient(180deg, #fff9e6 0%, #ffd9b3 60%, #ffb380 100%);
-  border: 3px solid #800000; border-radius: 12px; height: 75px;
-  display: flex; justify-content: center; align-items: center; font-size: 2.8rem;
-  box-shadow: inset 0 4px 6px rgba(255,255,255,0.9), inset 0 -4px 6px rgba(0,0,0,0.4), 0 4px 8px rgba(0,0,0,0.5);
-  position: relative; overflow: hidden;
+  background: linear-gradient(180deg, #fff9e6 0%, #ffb380 100%);
+  border: 2px solid #800000; border-radius: 10px; height: 70px;
+  display: flex; justify-content: center; align-items: center; font-size: 2.6rem;
 }
 
 .cell.spinning .symbol-wrapper { animation: spinBlur 0.08s infinite linear; }
-.cell.winner {
-  background: linear-gradient(180deg, #ffff99 0%, #ffcc00 100%);
-  border-color: #ff0000; animation: pulseWin 0.6s infinite alternate;
-}
+.cell.winner { background: #ffcc00; border-color: #ff0000; }
 
-@keyframes spinBlur {
-  0% { transform: translateY(-15px) scaleY(1.2); filter: blur(4px); }
-  100% { transform: translateY(15px) scaleY(1.2); filter: blur(4px); }
-}
+@keyframes spinBlur { 0% { transform: translateY(-10px); } 100% { transform: translateY(10px); } }
 
-@keyframes pulseWin {
-  0% { transform: scale(1); box-shadow: 0 0 10px #ffe600; }
-  100% { transform: scale(1.06); box-shadow: 0 0 25px #ffe600, 0 0 40px #ff0000; }
-}
-
-/* Banner de Status */
 .status-banner {
-  width: 100%; background: linear-gradient(90deg, transparent 0%, rgba(255, 204, 0, 0.2) 50%, transparent 100%);
-  border-top: 1px solid rgba(255,215,0,0.4); border-bottom: 1px solid rgba(255,215,0,0.4);
-  padding: 6px; text-align: center; color: #ffe680; font-size: 0.85rem; text-shadow: 0 1px 3px #000;
+  width: 100%; background: rgba(0,0,0,0.4); border-top: 1px solid rgba(255,215,0,0.3);
+  padding: 4px; text-align: center; color: #ffe680; font-size: 0.8rem;
 }
 
-/* Painel Inferior estilo Cassino */
-.footer-panel { width: 100%; display: flex; flex-direction: column; gap: 10px; }
+.footer-panel { width: 100%; display: flex; flex-direction: column; gap: 8px; }
 .stats-ribbon {
-  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px;
-  background: rgba(0,0,0,0.7); border: 2px solid #d4af37; border-radius: 14px; padding: 8px 6px;
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px;
+  background: rgba(0,0,0,0.7); border: 1.5px solid #d4af37; border-radius: 12px; padding: 6px;
 }
+.stat-box { display: flex; flex-direction: column; align-items: center; }
+.stat-label { font-size: 0.55rem; color: #d4af37; }
+.stat-value { font-size: 0.85rem; font-weight: 900; color: #fff; }
 
-.stat-box { display: flex; flex-direction: column; align-items: center; text-align: center; }
-.stat-label { font-size: 0.6rem; color: #d4af37; letter-spacing: 0.5px; font-weight: bold; }
-.stat-value { font-size: 0.95rem; font-weight: 900; color: #fff; text-shadow: 0 1px 2px #000; }
-.stat-box.win .stat-value { color: #55ff55; }
-
-/* Botões Gamificados */
-.action-controls { display: flex; gap: 10px; justify-content: space-between; align-items: center; }
-.btn-step {
-  background: linear-gradient(180deg, #ffd700 0%, #b8860b 100%);
-  border: 2px solid #fff; width: 50px; height: 54px; border-radius: 14px;
-  font-size: 1.8rem; font-weight: 900; color: #000; cursor: pointer;
-  box-shadow: 0 5px 0 #5c4033, 0 8px 15px rgba(0,0,0,0.6);
-}
-
+.action-controls { display: flex; gap: 8px; }
+.btn-step { background: #ffd700; border: none; width: 44px; height: 50px; border-radius: 12px; font-size: 1.6rem; font-weight: 900; }
 #btn-spin {
-  flex: 1; height: 58px; background: linear-gradient(180deg, #fff266 0%, #ff8800 50%, #cc3300 100%);
-  border: 2px solid #ffe680; border-radius: 16px; cursor: pointer;
-  box-shadow: 0 6px 0 #661100, 0 10px 20px rgba(0,0,0,0.7);
-  display: flex; justify-content: center; align-items: center; transition: all 0.1s ease;
+  flex: 1; height: 50px; background: linear-gradient(180deg, #fff266 0%, #cc3300 100%);
+  border: 1.5px solid #ffe680; border-radius: 12px; cursor: pointer; color: #fff; font-size: 1.4rem; font-weight: 900;
 }
 
-#btn-spin:active { transform: translateY(4px); box-shadow: 0 2px 0 #661100; }
-#btn-spin .spin-text {
-  font-size: 1.6rem; font-weight: 900; color: #fff;
-  text-shadow: 0 2px 4px #000, 0 0 10px rgba(255, 255, 255, 0.6); letter-spacing: 2px;
+/* Modais PIX e Saque */
+.modal-overlay {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85);
+  display: flex; justify-content: center; align-items: center; z-index: 999; visibility: hidden; opacity: 0; transition: all 0.2s;
 }
+.modal-overlay.active { visibility: visible; opacity: 1; }
+.modal-content {
+  background: linear-gradient(180deg, #3a0000 0%, #1a0000 100%); border: 3px solid #ffd700;
+  border-radius: 18px; padding: 20px; width: 90%; max-width: 360px; text-align: center; position: relative;
+}
+.modal-close { position: absolute; top: 10px; right: 12px; background: none; border: none; color: #ffd700; font-size: 1.4rem; cursor: pointer; }
+.modal-content h2 { color: #ffd700; font-size: 1.3rem; margin-bottom: 15px; }
+
+.input-group { display: flex; flex-direction: column; gap: 6px; text-align: left; margin-bottom: 12px; }
+.input-group label { font-size: 0.75rem; color: #d4af37; }
+.input-group input { padding: 10px; border-radius: 8px; border: 1px solid #ffd700; background: #000; color: #fff; font-weight: bold; }
+
+.btn-action {
+  width: 100%; padding: 12px; border-radius: 10px; border: none; background: #ffd700;
+  color: #000; font-weight: 900; font-size: 1rem; cursor: pointer; margin-top: 6px;
+}
+.btn-action.secondary { background: #555; color: #fff; }
+.btn-action.success { background: #00b300; color: #fff; }
+
+.pix-result { margin-top: 15px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.pix-result.hidden { display: none; }
+.pix-result img { width: 150px; height: 150px; border: 3px solid #fff; border-radius: 8px; }
