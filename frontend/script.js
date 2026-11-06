@@ -4,13 +4,15 @@ const EMOJIS = ['🐯', '🏺', '🟢', '🧧', '🪙'];
 
 function alterarAposta(v) {
   apostaAtual = Math.max(0.50, apostaAtual + v);
-  document.getElementById('aposta-display').innerText = `R$ ${apostaAtual.toFixed(2)}`;
+  document.getElementById('aposta-display').innerText = `R$ ${apostaAtual.toFixed(2).replace('.', ',')}`;
 }
 
 async function girar() {
   const btn = document.getElementById('btn-spin');
+  const banner = document.getElementById('banner-text');
   btn.disabled = true;
-  document.getElementById('win-display').innerText = 'R$ 0.00';
+  banner.innerText = "Girando os Rolos da Sorte...";
+  document.getElementById('win-display').innerText = 'R$ 0,00';
 
   const cells = [];
   for (let r = 0; r < 3; r++) {
@@ -23,8 +25,11 @@ async function girar() {
   }
 
   const anim = setInterval(() => {
-    cells.forEach(c => c.innerText = EMOJIS[Math.floor(Math.random() * EMOJIS.length)]);
-  }, 70);
+    cells.forEach(c => {
+      const wrapper = c.querySelector('.symbol-wrapper');
+      if (wrapper) wrapper.innerText = EMOJIS[Math.floor(Math.random() * EMOJIS.length)];
+    });
+  }, 60);
 
   try {
     const res = await fetch(`${API_URL}/spin`, {
@@ -42,27 +47,29 @@ async function girar() {
       if (res.ok) {
         for (let r = 0; r < 3; r++) {
           for (let c = 0; c < 3; c++) {
-            document.getElementById(`c${r}${c}`).innerText = data.matriz[r][c].emoji;
+            document.getElementById(`c${r}${c}`).querySelector('.symbol-wrapper').innerText = data.matriz[r][c].emoji;
           }
         }
 
-        document.getElementById('saldo').innerText = `R$ ${data.novoSaldo.toFixed(2)}`;
-        document.getElementById('win-display').innerText = `R$ ${data.premio.toFixed(2)}`;
+        document.getElementById('saldo').innerText = `R$ ${data.novoSaldo.toFixed(2).replace('.', ',')}`;
+        document.getElementById('win-display').innerText = `R$ ${data.premio.toFixed(2).replace('.', ',')}`;
 
         if (data.premio > 0) {
-          // Destacar células vencedoras
+          banner.innerText = `🎉 GRAND WIN! Ganho de R$ ${data.premio.toFixed(2).replace('.', ',')}!`;
           cells.forEach(c => c.classList.add('winner'));
+        } else {
+          banner.innerText = "Tente novamente na próxima rodada!";
         }
       } else {
-        alert(data.error || 'Erro no giro');
+        banner.innerText = data.error || 'Erro no giro';
       }
       btn.disabled = false;
-    }, 1000);
+    }, 1100);
 
   } catch (err) {
     clearInterval(anim);
     cells.forEach(c => c.classList.remove('spinning'));
-    alert('Erro de conexão');
+    banner.innerText = 'Erro de conexão com o servidor';
     btn.disabled = false;
   }
 }

@@ -3,38 +3,98 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Fortune Tiger 3x3</title>
+  <title>Fortune Tiger - Premium Slot</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <div class="background-effects">
+    <div class="gold-sparkles"></div>
+  </div>
+
   <div class="game-container">
-    <header class="header">
-      <div class="tiger-mascot">🐯</div>
-      <div class="logo">FORTUNE TIGER</div>
+    <!-- Mascote do Tigre estilo Fortune Tiger -->
+    <header class="mascot-header">
+      <div class="pagoda-roof"></div>
+      <div class="tiger-container">
+        <svg class="tiger-svg" viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="40" fill="#ffaa00" stroke="#d4af37" stroke-width="3"/>
+          <circle cx="35" cy="40" r="6" fill="#fff"/><circle cx="65" cy="40" r="6" fill="#fff"/>
+          <circle cx="35" cy="40" r="3" fill="#000"/><circle cx="65" cy="40" r="3" fill="#000"/>
+          <!-- Óculos escuros estilo Fortune Tiger -->
+          <rect x="25" y="32" width="22" height="14" rx="3" fill="#111" stroke="#ffd700" stroke-width="2"/>
+          <rect x="53" y="32" width="22" height="14" rx="3" fill="#111" stroke="#ffd700" stroke-width="2"/>
+          <line x1="47" y1="38" x2="53" y2="38" stroke="#ffd700" stroke-width="2"/>
+          <!-- Sorriso com dente -->
+          <path d="M 35 65 Q 50 80 65 65" fill="none" stroke="#7a0000" stroke-width="4" stroke-linecap="round"/>
+          <polygon points="46,65 50,72 54,65" fill="#fff"/>
+          <!-- Listras -->
+          <path d="M 50 15 L 50 25 M 40 18 L 45 25 M 60 18 L 55 25" stroke="#441100" stroke-width="3"/>
+        </svg>
+      </div>
+      <div class="logo-banner">
+        <span>FORTUNE</span>
+        <h1>TIGER</h1>
+      </div>
     </header>
 
+    <!-- Slot Machine 3x3 com moldura chinesa -->
     <main class="slot-machine">
-      <div class="oriental-frame">
-        <div class="line-indicators left"><span>1</span><span>2</span><span>3</span></div>
-        <div class="grid-3x3">
-          <div class="cell" id="c00">🐯</div><div class="cell" id="c01">🐯</div><div class="cell" id="c02">🐯</div>
-          <div class="cell" id="c10">🐯</div><div class="cell" id="c11">🐯</div><div class="cell" id="c12">🐯</div>
-          <div class="cell" id="c20">🐯</div><div class="cell" id="c21">🐯</div><div class="cell" id="c22">🐯</div>
+      <div class="temple-frame">
+        <div class="roof-ornament left"></div>
+        <div class="roof-ornament right"></div>
+        
+        <div class="line-indicators left">
+          <span class="indicator idx-1">1</span>
+          <span class="indicator idx-2">2</span>
+          <span class="indicator idx-3">3</span>
         </div>
-        <div class="line-indicators right"><span>4</span><span>5</span></div>
+
+        <div class="grid-3x3">
+          <div class="cell" id="c00"><div class="symbol-wrapper">🐯</div></div>
+          <div class="cell" id="c01"><div class="symbol-wrapper">🏺</div></div>
+          <div class="cell" id="c02"><div class="symbol-wrapper">🟢</div></div>
+          <div class="cell" id="c10"><div class="symbol-wrapper">🧧</div></div>
+          <div class="cell" id="c11"><div class="symbol-wrapper">🐯</div></div>
+          <div class="cell" id="c12"><div class="symbol-wrapper">🪙</div></div>
+          <div class="cell" id="c20"><div class="symbol-wrapper">🟢</div></div>
+          <div class="cell" id="c21"><div class="symbol-wrapper">🧧</div></div>
+          <div class="cell" id="c22"><div class="symbol-wrapper">🐯</div></div>
+        </div>
+
+        <div class="line-indicators right">
+          <span class="indicator idx-4">4</span>
+          <span class="indicator idx-5">5</span>
+        </div>
       </div>
     </main>
 
+    <!-- Banner de Ganhos/Status -->
+    <div class="status-banner">
+      <span id="banner-text">Gira para obter a Sorte do Tigre!</span>
+    </div>
+
+    <!-- Painel Financeiro e Controles -->
     <footer class="footer-panel">
-      <div class="info-bar">
-        <div class="info-box"><span class="lbl">SALDO</span><strong id="saldo">R$ 100.00</strong></div>
-        <div class="info-box"><span class="lbl">APOSTA</span><strong id="aposta-display">R$ 1.00</strong></div>
-        <div class="info-box"><span class="lbl">WIN</span><strong id="win-display">R$ 0.00</strong></div>
+      <div class="stats-ribbon">
+        <div class="stat-box">
+          <span class="stat-label">CARTEIRA</span>
+          <span class="stat-value" id="saldo">R$ 100,00</span>
+        </div>
+        <div class="stat-box highlight">
+          <span class="stat-label">APOSTA TOTAL</span>
+          <span class="stat-value" id="aposta-display">R$ 1,00</span>
+        </div>
+        <div class="stat-box win">
+          <span class="stat-label">GANHO</span>
+          <span class="stat-value" id="win-display">R$ 0,00</span>
+        </div>
       </div>
 
-      <div class="controls">
+      <div class="action-controls">
         <button class="btn-step" onclick="alterarAposta(-0.50)">-</button>
-        <button id="btn-spin" onclick="girar()">GIRAR</button>
+        <button id="btn-spin" onclick="girar()">
+          <span class="spin-text">GIRAR</span>
+        </button>
         <button class="btn-step" onclick="alterarAposta(0.50)">+</button>
       </div>
     </footer>
