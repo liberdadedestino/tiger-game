@@ -1,12 +1,17 @@
 const express = require('express');
 const cors = require('cors');
+const axios = require('axios'); // Para requisições HTTPS à API do Gateway
 require('dotenv').config();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.get('/', (req, res) => res.send('API Tigrinho 3x3 rodando com PIX!'));
+app.get('/', (req, res) => res.send('API Tigrinho 3x3 rodando com Gateway Real!'));
+
+// Credenciais do Gateway (Definidas via Variáveis de Ambiente no Render)
+const GATEWAY_API_KEY = process.env.GATEWAY_API_KEY || 'SUA_CHAVE_API_AQUI';
+const GATEWAY_BASE_URL = process.env.GATEWAY_BASE_URL || 'https://api.pushinpay.com.br/api'; 
 
 const SIMBOLOS = [
   { id: 'WILD', peso: 5, multiplicador: 50, emoji: '🐯' },
@@ -17,6 +22,7 @@ const SIMBOLOS = [
 ];
 
 const usuarios = { "user123": { saldo: 100.00 } };
+const cobrancasPendentes = {}; // Guarda IDs de cobrança para vincular no Webhook
 
 function sortearSimbolo() {
   const pesoTotal = SIMBOLOS.reduce((acc, s) => acc + s.peso, 0);
@@ -39,7 +45,7 @@ function validarLinha(s1, s2, s3) {
   return 0;
 }
 
-// Rota do Giro
+// Rota do Giro do Slot
 app.post('/api/spin', (req, res) => {
   const { userId, aposta } = req.body;
   if (!usuarios[userId] || usuarios[userId].saldo < aposta) {
@@ -85,34 +91,66 @@ app.post('/api/spin', (req, res) => {
   });
 });
 
-// Endpoint: Gerar Depósito PIX
-app.post('/api/deposit/pix', (req, res) => {
+// Endpoint REAL: Criar Cobrança PIX no Gateway
+app.post('/api/deposit/pix', async (req, res) => {
   const { userId, valor } = req.body;
   if (!valor || valor < 5) {
     return res.status(400).json({ error: 'Valor mínimo de depósito é R$ 5,00' });
   }
 
-  const pixCode = `00020126580014BR.GOV.BCB.PIX0136123e4567-e89b-12d3-a456-426614174000520400005303986540${parseFloat(valor).toFixed(2)}5802BR5913TIGRINO GAME6009PARAGUAY62070503***6304E2CA`;
+  try {
+    // Chamada HTTP para o Gateway de Pagamento
+    const response = await axios.post(`${GATEWAY_BASE_URL}/pix/cashIn`, {
+      value: Math.round(valor * 100), // Valor em centavos
+      webhook_url: 'https://tiger-game.onrender.com/api/webhook/pix'
+    }, {
+      headers: {
+        'Authorization': `Bearer ${GATEWAY_API_KEY}`,
+        'Content-Type': 'application/json'
+      }
+    });
 
-  return res.json({
-    message: 'PIX gerado com sucesso',
-    valor: parseFloat(valor),
-    pixCopiaECola: pixCode,
-    qrCodeUrl: `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(pixCode)}`
-  });
-});
+    const { id, qrcode, qr_code_base64 } = response.data;
+    
+    // Mapeia a transação para o usuário
+    cobrancasPendentes[id] = { userId, valor: parseFloat(valor), status: 'PENDING' };
 
-// Endpoint: Confirmar Depósito (Simulação de Webhook do Gateway)
-app.post('/api/deposit/confirm', (req, res) => {
-  const { userId, valor } = req.body;
-  if (usuarios[userId]) {
-    usuarios[userId].saldo += parseFloat(valor);
-    return res.json({ success: true, novoSaldo: usuarios[userId].saldo });
+    return res.json({
+      transactionId: id,
+      valor: parseFloat(valor),
+      pixCopiaECola: qrcode,
+      qrCodeUrl: qr_code_base64 || `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(qrcode)}`
+    });
+
+  } catch (error) {
+    console.error('Erro na API de Pagamentos:', error.response?.data || error.message);
+    return res.status(500).json({ error: 'Erro ao gerar PIX no gateway de pagamento.' });
   }
-  res.status(404).json({ error: 'Usuário não encontrado' });
 });
 
-// Endpoint: Solicitar Saque
+// Endpoint REAL: Webhook recebido do Gateway quando o PIX é pago
+app.post('/api/webhook/pix', (req, res) => {
+  const { id, status, value } = req.body;
+
+  // Verifica se o pagamento foi confirmado
+  if (status === 'PAID' || status === 'CONFIRMED') {
+    const cobranca = cobrancasPendentes[id];
+    if (cobranca && cobranca.status === 'PENDING') {
+      const userId = cobranca.userId;
+      const valorDepositado = value ? value / 100 : cobranca.valor;
+
+      if (usuarios[userId]) {
+        usuarios[userId].saldo += valorDepositado;
+      }
+      cobranca.status = 'PAID';
+      console.log(`Depósito de R$ ${valorDepositado} confirmado para o usuário ${userId}`);
+    }
+  }
+
+  res.sendStatus(200); // Retorna 200 OK para o Gateway não reenviar
+});
+
+// Endpoint: Saque PIX
 app.post('/api/withdraw', (req, res) => {
   const { userId, valor, chavePix } = req.body;
   if (!usuarios[userId] || usuarios[userId].saldo < valor) {
@@ -123,7 +161,7 @@ app.post('/api/withdraw', (req, res) => {
   }
 
   usuarios[userId].saldo -= parseFloat(valor);
-  return res.json({ success: true, novoSaldo: usuarios[userId].saldo, message: 'Saque solicitado com sucesso!' });
+  return res.json({ success: true, novoSaldo: usuarios[userId].saldo, message: 'Solicitação de saque enviada com sucesso!' });
 });
 
 const PORT = process.env.PORT || 3000;
