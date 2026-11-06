@@ -2,33 +2,41 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fortune Tiger Classic</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Fortune Tiger 3x3</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="game-container">
     <header class="header">
-      <h1>FORTUNE TIGER</h1>
-      <div class="balance-box">
-        <span>SALDO: R$ <strong id="saldo">100.00</strong></span>
-      </div>
+      <div class="tiger-mascot">🐯</div>
+      <div class="logo">FORTUNE TIGER</div>
     </header>
 
     <main class="slot-machine">
-      <div class="reel-container">
-        <div class="reel" id="reel1">🐯</div>
-        <div class="reel" id="reel2">🐯</div>
-        <div class="reel" id="reel3">🐯</div>
+      <div class="oriental-frame">
+        <div class="line-indicators left"><span>1</span><span>2</span><span>3</span></div>
+        <div class="grid-3x3">
+          <div class="cell" id="c00">🐯</div><div class="cell" id="c01">🐯</div><div class="cell" id="c02">🐯</div>
+          <div class="cell" id="c10">🐯</div><div class="cell" id="c11">🐯</div><div class="cell" id="c12">🐯</div>
+          <div class="cell" id="c20">🐯</div><div class="cell" id="c21">🐯</div><div class="cell" id="c22">🐯</div>
+        </div>
+        <div class="line-indicators right"><span>4</span><span>5</span></div>
       </div>
     </main>
 
-    <footer class="controls">
-      <div class="bet-control">
-        <label>Aposta: R$</label>
-        <input type="number" id="aposta" value="1.00" min="0.50" step="0.50">
+    <footer class="footer-panel">
+      <div class="info-bar">
+        <div class="info-box"><span class="lbl">SALDO</span><strong id="saldo">R$ 100.00</strong></div>
+        <div class="info-box"><span class="lbl">APOSTA</span><strong id="aposta-display">R$ 1.00</strong></div>
+        <div class="info-box"><span class="lbl">WIN</span><strong id="win-display">R$ 0.00</strong></div>
       </div>
-      <button id="btn-spin" onclick="girar()">GIRAR</button>
+
+      <div class="controls">
+        <button class="btn-step" onclick="alterarAposta(-0.50)">-</button>
+        <button id="btn-spin" onclick="girar()">GIRAR</button>
+        <button class="btn-step" onclick="alterarAposta(0.50)">+</button>
+      </div>
     </footer>
   </div>
   <script src="script.js"></script>
