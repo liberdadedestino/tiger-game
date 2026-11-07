@@ -116,13 +116,14 @@ body {
 .auth-sub { font-size: 0.75rem; color: #ccc; margin-bottom: 14px; }
 
 .btn-social {
-  width: 100%; padding: 10px; border-radius: 10px; border: none; font-weight: bold;
-  font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px;
+  width: 100%; padding: 12px; border-radius: 12px; border: none; font-weight: bold;
+  font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.4); transition: transform 0.1s;
 }
+.btn-social:active { transform: scale(0.98); }
 .btn-social.google { background: #ffffff; color: #333; }
 .btn-social.instagram { background: linear-gradient(45deg, #405DE6, #E1306C, #FFDC80); color: #fff; }
-
-.auth-divider { border-bottom: 1px solid #555; margin: 12px 0; text-align: center; font-size: 0.7rem; color: #888; }
+.btn-social.facebook { background: #1877F2; color: #fff; }
 
 .input-group { display: flex; flex-direction: column; gap: 4px; text-align: left; margin-bottom: 10px; }
 .input-group label { font-size: 0.7rem; color: #ffd700; }

@@ -25,26 +25,14 @@ function alterarAposta(v) {
 }
 
 async function loginSocial(provedor) {
-  const emailMock = `${provedor.toLowerCase()}_user_${Math.floor(Math.random() * 1000)}@exemplo.com`;
-  const nomeMock = `Jogador ${provedor}`;
-  await autenticarUsuario(emailMock, nomeMock, provedor);
-}
-
-async function loginEmail() {
-  const email = document.getElementById('auth-email').value;
-  if (!email) {
-    alert('Digite um e-mail válido!');
-    return;
-  }
-  await autenticarUsuario(email, email.split('@')[0], 'email');
-}
-
-async function autenticarUsuario(email, nome, provedor) {
+  const socialId = `${provedor.toLowerCase()}_${Math.floor(100000 + Math.random() * 900000)}`;
+  const nomeUsuario = `Jogador ${provedor}`;
+  
   try {
     const res = await fetch(`${API_URL}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, nome, provedor })
+      body: JSON.stringify({ userId: socialId, nome: nomeUsuario, provedor: provedor })
     });
     const data = await res.json();
 
@@ -53,7 +41,7 @@ async function autenticarUsuario(email, nome, provedor) {
       localStorage.setItem('user_tigrinho', JSON.stringify(data));
       atualizarUIUsuario();
       fecharModal('modal-auth');
-      document.getElementById('banner-text').innerText = `Bem-vindo, ${usuarioAtual.nome}! Faça sua aposta.`;
+      document.getElementById('banner-text').innerText = `Bem-vindo (${provedor}), ${usuarioAtual.nome}! Faça sua aposta.`;
     } else {
       alert(data.error);
     }

@@ -58,7 +58,7 @@
     </main>
 
     <div class="status-banner">
-      <span id="banner-text">Faça login para salvar seu saldo e jogar!</span>
+      <span id="banner-text">Conecte sua rede social para vincular seu saldo e jogar!</span>
     </div>
 
     <footer class="footer-panel">
@@ -87,7 +87,7 @@
     </footer>
   </div>
 
-  <!-- Modal Login / Cadastro (Google & Instagram) -->
+  <!-- Modal Login Social Exclusivo (Google, Instagram e Facebook) -->
   <div class="modal-overlay" id="modal-auth">
     <div class="modal-content">
       <button class="modal-close" onclick="fecharModal('modal-auth')">✕</button>
@@ -102,13 +102,9 @@
         <span class="social-icon">📸</span> Continuar com Instagram
       </button>
 
-      <div class="auth-divider"><span>ou com e-mail</span></div>
-
-      <div class="input-group">
-        <label>E-mail</label>
-        <input type="email" id="auth-email" placeholder="seuemail@exemplo.com">
-      </div>
-      <button class="btn-action" onclick="loginEmail()">ACESSAR MINHA CONTA</button>
+      <button class="btn-social facebook" onclick="loginSocial('Facebook')">
+        <span class="social-icon">📘</span> Continuar com Facebook
+      </button>
     </div>
   </div>
 

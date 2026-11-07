@@ -9,27 +9,23 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.get('/', (req, res) => res.send('API Fortune Tiger Vegas com Autenticação!'));
+app.get('/', (req, res) => res.send('API Fortune Tiger Vegas com Autenticação Social!'));
 
 const GATEWAY_API_KEY = process.env.GATEWAY_API_KEY || '';
 const GATEWAY_BASE_URL = process.env.GATEWAY_BASE_URL || 'https://api.pushinpay.com.br/api';
 const CREDENCIAIS_FILE = path.join(__dirname, 'credenciais.json');
 
-// Carregar credenciais salvas no disco
+// Carregar credenciais dos usuários do arquivo
 function carregarCredenciais() {
   if (!fs.existsSync(CREDENCIAIS_FILE)) {
-    const dadosIniciais = {
-      usuarios: {
-        "user123": { email: "demo@tigrinho.com", nome: "Jogador Demo", provedor: "local", saldo: 100.00 }
-      }
-    };
+    const dadosIniciais = { usuarios: {} };
     fs.writeFileSync(CREDENCIAIS_FILE, JSON.stringify(dadosIniciais, null, 2));
     return dadosIniciais;
   }
   return JSON.parse(fs.readFileSync(CREDENCIAIS_FILE, 'utf8'));
 }
 
-// Salvar credenciais no disco
+// Salvar novos perfis de usuários no arquivo CREDENCIAIS
 function salvarCredenciais(dados) {
   fs.writeFileSync(CREDENCIAIS_FILE, JSON.stringify(dados, null, 2));
 }
@@ -67,30 +63,32 @@ function validarLinha(s1, s2, s3) {
   return 0;
 }
 
-// ROTA: Autenticação Social / Login
+// ROTA: Autenticação Social (Google, Instagram, Facebook)
 app.post('/api/auth/login', (req, res) => {
-  const { email, nome, provedor } = req.body;
-  if (!email) {
-    return res.status(400).json({ error: 'E-mail é obrigatório para autenticação.' });
+  const { userId, nome, provedor, email } = req.body;
+  if (!userId || !provedor) {
+    return res.status(400).json({ error: 'Dados insuficientes para autenticação social.' });
   }
 
-  const userId = email.toLowerCase().replace(/[^a-z0-9]/g, '_');
+  const idFormatado = `${provedor.toLowerCase()}_${userId.toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
 
-  if (!db.usuarios[userId]) {
-    db.usuarios[userId] = {
-      email,
-      nome: nome || email.split('@')[0],
-      provedor: provedor || 'google',
-      saldo: 0.00
+  if (!db.usuarios[idFormatado]) {
+    db.usuarios[idFormatado] = {
+      userId: idFormatado,
+      nome: nome || `Jogador ${provedor}`,
+      email: email || `${idFormatado}@social.com`,
+      provedor: provedor,
+      saldo: 0.00,
+      criadoEm: new Date().toISOString()
     };
     salvarCredenciais(db);
   }
 
   return res.json({
-    userId,
-    nome: db.usuarios[userId].nome,
-    email: db.usuarios[userId].email,
-    saldo: db.usuarios[userId].saldo
+    userId: idFormatado,
+    nome: db.usuarios[idFormatado].nome,
+    provedor: db.usuarios[idFormatado].provedor,
+    saldo: db.usuarios[idFormatado].saldo
   });
 });
 
