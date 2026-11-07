@@ -1,18 +1,42 @@
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
+const fs = require('fs');
+const path = require('path');
 require('dotenv').config();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.get('/', (req, res) => res.send('API Fortune Tiger Vegas 3x3 Rodando!'));
+app.get('/', (req, res) => res.send('API Fortune Tiger Vegas com Autenticação!'));
 
 const GATEWAY_API_KEY = process.env.GATEWAY_API_KEY || '';
 const GATEWAY_BASE_URL = process.env.GATEWAY_BASE_URL || 'https://api.pushinpay.com.br/api';
+const CREDENCIAIS_FILE = path.join(__dirname, 'credenciais.json');
 
-// Tabela de Símbolos: Vegas Premium + Fortune Tiger
+// Carregar credenciais salvas no disco
+function carregarCredenciais() {
+  if (!fs.existsSync(CREDENCIAIS_FILE)) {
+    const dadosIniciais = {
+      usuarios: {
+        "user123": { email: "demo@tigrinho.com", nome: "Jogador Demo", provedor: "local", saldo: 100.00 }
+      }
+    };
+    fs.writeFileSync(CREDENCIAIS_FILE, JSON.stringify(dadosIniciais, null, 2));
+    return dadosIniciais;
+  }
+  return JSON.parse(fs.readFileSync(CREDENCIAIS_FILE, 'utf8'));
+}
+
+// Salvar credenciais no disco
+function salvarCredenciais(dados) {
+  fs.writeFileSync(CREDENCIAIS_FILE, JSON.stringify(dados, null, 2));
+}
+
+const db = carregarCredenciais();
+const cobrancasPendentes = {};
+
 const SIMBOLOS = [
   { id: 'WILD', peso: 5, multiplicador: 50, emoji: '🐯' },
   { id: 'SEVEN', peso: 10, multiplicador: 30, emoji: '🎰' },
@@ -21,9 +45,6 @@ const SIMBOLOS = [
   { id: 'GOLD', peso: 35, multiplicador: 5, emoji: '🪙' },
   { id: 'ENVELOPE', peso: 50, multiplicador: 2, emoji: '🧧' }
 ];
-
-const usuarios = { "user123": { saldo: 100.00 } };
-const cobrancasPendentes = {};
 
 function sortearSimbolo() {
   const pesoTotal = SIMBOLOS.reduce((acc, s) => acc + s.peso, 0);
@@ -46,18 +67,57 @@ function validarLinha(s1, s2, s3) {
   return 0;
 }
 
-// Endpoint do Giro (Aposta Mínima R$ 1,00)
+// ROTA: Autenticação Social / Login
+app.post('/api/auth/login', (req, res) => {
+  const { email, nome, provedor } = req.body;
+  if (!email) {
+    return res.status(400).json({ error: 'E-mail é obrigatório para autenticação.' });
+  }
+
+  const userId = email.toLowerCase().replace(/[^a-z0-9]/g, '_');
+
+  if (!db.usuarios[userId]) {
+    db.usuarios[userId] = {
+      email,
+      nome: nome || email.split('@')[0],
+      provedor: provedor || 'google',
+      saldo: 0.00
+    };
+    salvarCredenciais(db);
+  }
+
+  return res.json({
+    userId,
+    nome: db.usuarios[userId].nome,
+    email: db.usuarios[userId].email,
+    saldo: db.usuarios[userId].saldo
+  });
+});
+
+// ROTA: Consultar Saldo
+app.get('/api/user/balance/:userId', (req, res) => {
+  const { userId } = req.params;
+  const user = db.usuarios[userId];
+  if (!user) return res.status(404).json({ error: 'Usuário não encontrado' });
+  return res.json({ saldo: user.saldo });
+});
+
+// ROTA: Giro dos Slots
 app.post('/api/spin', (req, res) => {
   const { userId, aposta } = req.body;
-  
+  const user = db.usuarios[userId];
+
+  if (!user) {
+    return res.status(401).json({ error: 'Usuário não autenticado' });
+  }
   if (aposta < 1.00) {
     return res.status(400).json({ error: 'Aposta mínima é de R$ 1,00' });
   }
-  if (!usuarios[userId] || usuarios[userId].saldo < aposta) {
-    return res.status(400).json({ error: 'Saldo insuficiente para esta aposta' });
+  if (user.saldo < aposta) {
+    return res.status(400).json({ error: 'Saldo insuficiente para aposta' });
   }
 
-  usuarios[userId].saldo -= aposta;
+  user.saldo -= aposta;
 
   const matriz = [
     [sortearSimbolo(), sortearSimbolo(), sortearSimbolo()],
@@ -85,18 +145,20 @@ app.post('/api/spin', (req, res) => {
   });
 
   if (premioTotal > 0) {
-    usuarios[userId].saldo += premioTotal;
+    user.saldo += premioTotal;
   }
+
+  salvarCredenciais(db);
 
   return res.json({
     matriz: matriz.map(row => row.map(s => ({ emoji: s.emoji, id: s.id }))),
     premio: premioTotal,
     linhasGanhas: linhasVencedoras,
-    novoSaldo: usuarios[userId].saldo
+    novoSaldo: user.saldo
   });
 });
 
-// Endpoint Depósito PIX Real (Mínimo R$ 5,00)
+// ROTA: Depósito PIX
 app.post('/api/deposit/pix', async (req, res) => {
   const { userId, valor } = req.body;
   if (!valor || valor < 5.00) {
@@ -135,28 +197,27 @@ app.post('/api/deposit/pix', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Erro na API Pushin Pay:', error.response?.data || error.message);
-    return res.status(500).json({ error: 'Erro ao gerar cobrança PIX no gateway.' });
+    return res.status(500).json({ error: 'Erro ao gerar cobrança PIX.' });
   }
 });
 
-// Checagem de Status do Pagamento (Polling do Frontend)
+// ROTA: Status do PIX (Polling)
 app.get('/api/deposit/status/:id', (req, res) => {
   const { id } = req.params;
   const cobranca = cobrancasPendentes[id];
 
-  if (!cobranca) {
-    return res.json({ status: 'NOT_FOUND' });
-  }
+  if (!cobranca) return res.json({ status: 'NOT_FOUND' });
 
   const userId = cobranca.userId;
+  const user = db.usuarios[userId];
+
   return res.json({
     status: cobranca.status,
-    saldoAtual: usuarios[userId] ? usuarios[userId].saldo : 0
+    saldoAtual: user ? user.saldo : 0
   });
 });
 
-// Webhook Real Pushin Pay
+// ROTA: Webhook PIX
 app.post('/api/webhook/pix', (req, res) => {
   const { id, status, value } = req.body;
 
@@ -166,29 +227,32 @@ app.post('/api/webhook/pix', (req, res) => {
       const userId = cobranca.userId;
       const valorDepositado = value ? value / 100 : cobranca.valor;
 
-      if (usuarios[userId]) {
-        usuarios[userId].saldo += valorDepositado;
+      if (db.usuarios[userId]) {
+        db.usuarios[userId].saldo += valorDepositado;
+        salvarCredenciais(db);
       }
       cobranca.status = 'PAID';
-      console.log(`Depósito de R$ ${valorDepositado} creditado com sucesso!`);
     }
   }
 
   res.sendStatus(200);
 });
 
-// Endpoint de Saque
+// ROTA: Saque
 app.post('/api/withdraw', (req, res) => {
   const { userId, valor, chavePix } = req.body;
-  if (!usuarios[userId] || usuarios[userId].saldo < valor) {
+  const user = db.usuarios[userId];
+
+  if (!user || user.saldo < valor) {
     return res.status(400).json({ error: 'Saldo insuficiente para saque' });
   }
   if (!chavePix) {
     return res.status(400).json({ error: 'Informe uma chave PIX válida' });
   }
 
-  usuarios[userId].saldo -= parseFloat(valor);
-  return res.json({ success: true, novoSaldo: usuarios[userId].saldo, message: 'Saque solicitado com sucesso!' });
+  user.saldo -= parseFloat(valor);
+  salvarCredenciais(db);
+  return res.json({ success: true, novoSaldo: user.saldo, message: 'Saque solicitado com sucesso!' });
 });
 
 const PORT = process.env.PORT || 3000;

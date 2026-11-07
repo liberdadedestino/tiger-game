@@ -1,12 +1,17 @@
 const API_URL = 'https://tiger-game.onrender.com/api';
+let usuarioAtual = JSON.parse(localStorage.getItem('user_tigrinho')) || null;
 let apostaAtual = 1.00;
 let transactionPollInterval = null;
 const EMOJIS = ['🐯', '🎰', '💎', '🍒', '🪙', '🧧'];
 
-function alterarAposta(v) {
-  apostaAtual = Math.max(1.00, apostaAtual + v);
-  document.getElementById('aposta-display').innerText = `R$ ${apostaAtual.toFixed(2).replace('.', ',')}`;
-}
+document.addEventListener('DOMContentLoaded', () => {
+  if (usuarioAtual) {
+    atualizarUIUsuario();
+    atualizarSaldo();
+  } else {
+    abrirModal('modal-auth');
+  }
+});
 
 function abrirModal(id) { document.getElementById(id).classList.add('active'); }
 function fecharModal(id) { 
@@ -14,8 +19,75 @@ function fecharModal(id) {
   if (transactionPollInterval) clearInterval(transactionPollInterval);
 }
 
-// Giro dos Slots com DURAÇÃO DE EXATAMENTE 4 SEGUNDOS (4000ms)
+function alterarAposta(v) {
+  apostaAtual = Math.max(1.00, apostaAtual + v);
+  document.getElementById('aposta-display').innerText = `R$ ${apostaAtual.toFixed(2).replace('.', ',')}`;
+}
+
+async function loginSocial(provedor) {
+  const emailMock = `${provedor.toLowerCase()}_user_${Math.floor(Math.random() * 1000)}@exemplo.com`;
+  const nomeMock = `Jogador ${provedor}`;
+  await autenticarUsuario(emailMock, nomeMock, provedor);
+}
+
+async function loginEmail() {
+  const email = document.getElementById('auth-email').value;
+  if (!email) {
+    alert('Digite um e-mail válido!');
+    return;
+  }
+  await autenticarUsuario(email, email.split('@')[0], 'email');
+}
+
+async function autenticarUsuario(email, nome, provedor) {
+  try {
+    const res = await fetch(`${API_URL}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, nome, provedor })
+    });
+    const data = await res.json();
+
+    if (res.ok) {
+      usuarioAtual = data;
+      localStorage.setItem('user_tigrinho', JSON.stringify(data));
+      atualizarUIUsuario();
+      fecharModal('modal-auth');
+      document.getElementById('banner-text').innerText = `Bem-vindo, ${usuarioAtual.nome}! Faça sua aposta.`;
+    } else {
+      alert(data.error);
+    }
+  } catch (e) {
+    alert('Erro de conexão ao autenticar');
+  }
+}
+
+function atualizarUIUsuario() {
+  if (usuarioAtual) {
+    document.getElementById('user-display-name').innerText = usuarioAtual.nome;
+    document.getElementById('saldo').innerText = `R$ ${parseFloat(usuarioAtual.saldo).toFixed(2).replace('.', ',')}`;
+  }
+}
+
+async function atualizarSaldo() {
+  if (!usuarioAtual) return;
+  try {
+    const res = await fetch(`${API_URL}/user/balance/${usuarioAtual.userId}`);
+    const data = await res.json();
+    if (res.ok) {
+      usuarioAtual.saldo = data.saldo;
+      localStorage.setItem('user_tigrinho', JSON.stringify(usuarioAtual));
+      atualizarUIUsuario();
+    }
+  } catch (e) {}
+}
+
 async function girar() {
+  if (!usuarioAtual) {
+    abrirModal('modal-auth');
+    return;
+  }
+
   const btn = document.getElementById('btn-spin');
   const banner = document.getElementById('banner-text');
   btn.disabled = true;
@@ -32,7 +104,6 @@ async function girar() {
     }
   }
 
-  // Alterna símbolos rapidamente durante os 4 segundos
   const anim = setInterval(() => {
     cells.forEach(c => {
       const wrapper = c.querySelector('.symbol-wrapper');
@@ -44,12 +115,11 @@ async function girar() {
     const res = await fetch(`${API_URL}/spin`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId: 'user123', aposta: apostaAtual })
+      body: JSON.stringify({ userId: usuarioAtual.userId, aposta: apostaAtual })
     });
 
     const data = await res.json();
 
-    // Duração exata de 4000ms (4 segundos) de rotação
     setTimeout(() => {
       clearInterval(anim);
       cells.forEach(c => c.classList.remove('spinning'));
@@ -61,7 +131,10 @@ async function girar() {
           }
         }
 
-        document.getElementById('saldo').innerText = `R$ ${data.novoSaldo.toFixed(2).replace('.', ',')}`;
+        usuarioAtual.saldo = data.novoSaldo;
+        localStorage.setItem('user_tigrinho', JSON.stringify(usuarioAtual));
+        atualizarUIUsuario();
+
         document.getElementById('win-display').innerText = `R$ ${data.premio.toFixed(2).replace('.', ',')}`;
 
         if (data.premio > 0) {
@@ -74,7 +147,7 @@ async function girar() {
         banner.innerText = data.error || 'Erro ao processar aposta';
       }
       btn.disabled = false;
-    }, 4000); // 4 SEGUNDOS
+    }, 4000);
 
   } catch (err) {
     clearInterval(anim);
@@ -84,8 +157,12 @@ async function girar() {
   }
 }
 
-// Gerar PIX Real e Iniciar Checagem Automática (Polling)
 async function gerarPix() {
+  if (!usuarioAtual) {
+    abrirModal('modal-auth');
+    return;
+  }
+
   const val = parseFloat(document.getElementById('dep-val').value);
   if (val < 5.00) {
     alert('O valor mínimo de depósito é R$ 5,00');
@@ -96,7 +173,7 @@ async function gerarPix() {
     const res = await fetch(`${API_URL}/deposit/pix`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId: 'user123', valor: val })
+      body: JSON.stringify({ userId: usuarioAtual.userId, valor: val })
     });
     const data = await res.json();
 
@@ -105,15 +182,13 @@ async function gerarPix() {
       document.getElementById('pix-code').value = data.pixCopiaECola;
       document.getElementById('pix-result').classList.remove('hidden');
 
-      // Inicia verificação de status a cada 3 segundos
       if (transactionPollInterval) clearInterval(transactionPollInterval);
       transactionPollInterval = setInterval(() => checarStatusPix(data.transactionId), 3000);
-
     } else {
       alert(data.error);
     }
   } catch (err) {
-    alert('Erro ao gerar PIX real');
+    alert('Erro ao gerar PIX');
   }
 }
 
@@ -125,13 +200,13 @@ async function checarStatusPix(transactionId) {
 
     if (data.status === 'PAID') {
       clearInterval(transactionPollInterval);
-      document.getElementById('saldo').innerText = `R$ ${data.saldoAtual.toFixed(2).replace('.', ',')}`;
-      alert('🎉 Depósito confirmado via PIX! Saldo atualizado com sucesso.');
+      usuarioAtual.saldo = data.saldoAtual;
+      localStorage.setItem('user_tigrinho', JSON.stringify(usuarioAtual));
+      atualizarUIUsuario();
+      alert('🎉 Depósito confirmado via PIX! Saldo creditado na sua conta.');
       fecharModal('modal-deposit');
     }
-  } catch (e) {
-    console.log("Aguardando confirmação do PIX...");
-  }
+  } catch (e) {}
 }
 
 function copiarPix() {
@@ -142,6 +217,7 @@ function copiarPix() {
 }
 
 async function solicitarSaque() {
+  if (!usuarioAtual) return;
   const val = parseFloat(document.getElementById('saque-val').value);
   const chave = document.getElementById('saque-chave').value;
 
@@ -149,12 +225,14 @@ async function solicitarSaque() {
     const res = await fetch(`${API_URL}/withdraw`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId: 'user123', valor: val, chavePix: chave })
+      body: JSON.stringify({ userId: usuarioAtual.userId, valor: val, chavePix: chave })
     });
     const data = await res.json();
 
     if (res.ok) {
-      document.getElementById('saldo').innerText = `R$ ${data.novoSaldo.toFixed(2).replace('.', ',')}`;
+      usuarioAtual.saldo = data.novoSaldo;
+      localStorage.setItem('user_tigrinho', JSON.stringify(usuarioAtual));
+      atualizarUIUsuario();
       alert(data.message);
       fecharModal('modal-withdraw');
     } else {

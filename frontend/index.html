@@ -3,29 +3,32 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Vegas Fortune Tiger - Studio Slot</title>
+  <title>Vegas Fortune Tiger - Cassino</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="casino-bg">
-    <div class="spotlight left"></div>
-    <div class="spotlight right"></div>
-  </div>
+  <div class="casino-bg"></div>
 
   <div class="game-container">
     <header class="mascot-header">
       <div class="top-nav">
-        <button class="nav-btn deposit" onclick="abrirModal('modal-deposit')">+ DEPOSITAR</button>
-        <button class="nav-btn withdraw" onclick="abrirModal('modal-withdraw')">SAQUE</button>
+        <div class="user-badge" onclick="abrirModal('modal-auth')">
+          <span class="user-icon">👤</span>
+          <span id="user-display-name">Entrar</span>
+        </div>
+        <div class="nav-actions">
+          <button class="nav-btn deposit" onclick="abrirModal('modal-deposit')">+ DEPOSITAR</button>
+          <button class="nav-btn withdraw" onclick="abrirModal('modal-withdraw')">SAQUE</button>
+        </div>
       </div>
 
       <div class="mascot-wrapper">
         <div class="tiger-mascot">🐯</div>
-        <div class="vegas-badge">777 VEGAS</div>
+        <div class="vegas-badge">VEGAS 777</div>
       </div>
 
       <div class="logo-banner">
-        <span class="sub-title">LAS VEGAS & ORIENTAL</span>
+        <span class="sub-title">SLOT ONLINE REAL</span>
         <h1 class="main-title">FORTUNE TIGER</h1>
       </div>
     </header>
@@ -55,14 +58,14 @@
     </main>
 
     <div class="status-banner">
-      <span id="banner-text">Faça sua aposta a partir de R$ 1,00 e gire!</span>
+      <span id="banner-text">Faça login para salvar seu saldo e jogar!</span>
     </div>
 
     <footer class="footer-panel">
       <div class="stats-ribbon">
         <div class="stat-box">
           <span class="stat-label">SALDO DISPONÍVEL</span>
-          <span class="stat-value" id="saldo">R$ 100,00</span>
+          <span class="stat-value" id="saldo">R$ 0,00</span>
         </div>
         <div class="stat-box highlight">
           <span class="stat-label">APOSTA (MÍN R$ 1)</span>
@@ -84,7 +87,32 @@
     </footer>
   </div>
 
-  <!-- Modal Depósito PIX Real (Sem botão simular) -->
+  <!-- Modal Login / Cadastro (Google & Instagram) -->
+  <div class="modal-overlay" id="modal-auth">
+    <div class="modal-content">
+      <button class="modal-close" onclick="fecharModal('modal-auth')">✕</button>
+      <h2>ENTRAR / CADASTRAR</h2>
+      <p class="auth-sub">Conecte sua conta para vincular seu saldo de jogo</p>
+
+      <button class="btn-social google" onclick="loginSocial('Google')">
+        <span class="social-icon">🌐</span> Continuar com Google
+      </button>
+
+      <button class="btn-social instagram" onclick="loginSocial('Instagram')">
+        <span class="social-icon">📸</span> Continuar com Instagram
+      </button>
+
+      <div class="auth-divider"><span>ou com e-mail</span></div>
+
+      <div class="input-group">
+        <label>E-mail</label>
+        <input type="email" id="auth-email" placeholder="seuemail@exemplo.com">
+      </div>
+      <button class="btn-action" onclick="loginEmail()">ACESSAR MINHA CONTA</button>
+    </div>
+  </div>
+
+  <!-- Modal Depósito PIX -->
   <div class="modal-overlay" id="modal-deposit">
     <div class="modal-content">
       <button class="modal-close" onclick="fecharModal('modal-deposit')">✕</button>
@@ -101,7 +129,7 @@
         <button class="btn-action secondary" onclick="copiarPix()">COPIAR CHAVE PIX</button>
         <div class="pix-status-loader">
           <div class="spinner"></div>
-          <span id="pix-status-txt">Aguardando pagamento no app do banco...</span>
+          <span id="pix-status-txt">Aguardando pagamento no aplicativo do banco...</span>
         </div>
       </div>
     </div>
