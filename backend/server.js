@@ -7,17 +7,19 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.get('/', (req, res) => res.send('API Tigrinho 3x3 rodando com Pushin Pay Real!'));
+app.get('/', (req, res) => res.send('API Fortune Tiger Vegas 3x3 Rodando!'));
 
 const GATEWAY_API_KEY = process.env.GATEWAY_API_KEY || '';
 const GATEWAY_BASE_URL = process.env.GATEWAY_BASE_URL || 'https://api.pushinpay.com.br/api';
 
+// Tabela de Símbolos: Vegas Premium + Fortune Tiger
 const SIMBOLOS = [
   { id: 'WILD', peso: 5, multiplicador: 50, emoji: '🐯' },
-  { id: 'GOLD', peso: 15, multiplicador: 20, emoji: '🏺' },
-  { id: 'JADE', peso: 25, multiplicador: 10, emoji: '🟢' },
-  { id: 'ENVELOPE', peso: 35, multiplicador: 5, emoji: '🧧' },
-  { id: 'MOEDA', peso: 45, multiplicador: 2, emoji: '🪙' }
+  { id: 'SEVEN', peso: 10, multiplicador: 30, emoji: '🎰' },
+  { id: 'DIAMOND', peso: 15, multiplicador: 20, emoji: '💎' },
+  { id: 'CHERRY', peso: 25, multiplicador: 10, emoji: '🍒' },
+  { id: 'GOLD', peso: 35, multiplicador: 5, emoji: '🪙' },
+  { id: 'ENVELOPE', peso: 50, multiplicador: 2, emoji: '🧧' }
 ];
 
 const usuarios = { "user123": { saldo: 100.00 } };
@@ -44,10 +46,15 @@ function validarLinha(s1, s2, s3) {
   return 0;
 }
 
+// Endpoint do Giro (Aposta Mínima R$ 1,00)
 app.post('/api/spin', (req, res) => {
   const { userId, aposta } = req.body;
+  
+  if (aposta < 1.00) {
+    return res.status(400).json({ error: 'Aposta mínima é de R$ 1,00' });
+  }
   if (!usuarios[userId] || usuarios[userId].saldo < aposta) {
-    return res.status(400).json({ error: 'Saldo insuficiente' });
+    return res.status(400).json({ error: 'Saldo insuficiente para esta aposta' });
   }
 
   usuarios[userId].saldo -= aposta;
@@ -89,11 +96,11 @@ app.post('/api/spin', (req, res) => {
   });
 });
 
-// Endpoint Depósito PIX Real via Pushin Pay
+// Endpoint Depósito PIX Real (Mínimo R$ 5,00)
 app.post('/api/deposit/pix', async (req, res) => {
   const { userId, valor } = req.body;
-  if (!valor || valor < 5) {
-    return res.status(400).json({ error: 'Valor mínimo de depósito é R$ 5,00' });
+  if (!valor || valor < 5.00) {
+    return res.status(400).json({ error: 'O valor mínimo de depósito é R$ 5,00' });
   }
 
   const token = GATEWAY_API_KEY;
@@ -121,7 +128,6 @@ app.post('/api/deposit/pix', async (req, res) => {
     cobrancasPendentes[idTransacao] = { userId, valor: parseFloat(valor), status: 'PENDING' };
 
     return res.json({
-      message: 'PIX real gerado com sucesso via Pushin Pay',
       transactionId: idTransacao,
       valor: parseFloat(valor),
       pixCopiaECola: pixCopiaECola,
@@ -130,11 +136,24 @@ app.post('/api/deposit/pix', async (req, res) => {
 
   } catch (error) {
     console.error('Erro na API Pushin Pay:', error.response?.data || error.message);
-    return res.status(500).json({ 
-      error: 'Erro ao gerar PIX na Pushin Pay.', 
-      details: error.response?.data || error.message 
-    });
+    return res.status(500).json({ error: 'Erro ao gerar cobrança PIX no gateway.' });
   }
+});
+
+// Checagem de Status do Pagamento (Polling do Frontend)
+app.get('/api/deposit/status/:id', (req, res) => {
+  const { id } = req.params;
+  const cobranca = cobrancasPendentes[id];
+
+  if (!cobranca) {
+    return res.json({ status: 'NOT_FOUND' });
+  }
+
+  const userId = cobranca.userId;
+  return res.json({
+    status: cobranca.status,
+    saldoAtual: usuarios[userId] ? usuarios[userId].saldo : 0
+  });
 });
 
 // Webhook Real Pushin Pay
@@ -151,14 +170,14 @@ app.post('/api/webhook/pix', (req, res) => {
         usuarios[userId].saldo += valorDepositado;
       }
       cobranca.status = 'PAID';
-      console.log(`Depósito de R$ ${valorDepositado} creditado para o usuário ${userId}`);
+      console.log(`Depósito de R$ ${valorDepositado} creditado com sucesso!`);
     }
   }
 
   res.sendStatus(200);
 });
 
-// Saque
+// Endpoint de Saque
 app.post('/api/withdraw', (req, res) => {
   const { userId, valor, chavePix } = req.body;
   if (!usuarios[userId] || usuarios[userId].saldo < valor) {
@@ -169,7 +188,7 @@ app.post('/api/withdraw', (req, res) => {
   }
 
   usuarios[userId].saldo -= parseFloat(valor);
-  return res.json({ success: true, novoSaldo: usuarios[userId].saldo, message: 'Solicitação de saque enviada com sucesso!' });
+  return res.json({ success: true, novoSaldo: usuarios[userId].saldo, message: 'Saque solicitado com sucesso!' });
 });
 
 const PORT = process.env.PORT || 3000;

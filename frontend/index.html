@@ -3,11 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Fortune Tiger - Slots & PIX</title>
+  <title>Vegas Fortune Tiger - Studio Slot</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="background-effects"></div>
+  <div class="casino-bg">
+    <div class="spotlight left"></div>
+    <div class="spotlight right"></div>
+  </div>
 
   <div class="game-container">
     <header class="mascot-header">
@@ -16,22 +19,14 @@
         <button class="nav-btn withdraw" onclick="abrirModal('modal-withdraw')">SAQUE</button>
       </div>
 
-      <div class="tiger-container">
-        <svg class="tiger-svg" viewBox="0 0 100 100">
-          <circle cx="50" cy="50" r="40" fill="#ffaa00" stroke="#d4af37" stroke-width="3"/>
-          <circle cx="35" cy="40" r="6" fill="#fff"/><circle cx="65" cy="40" r="6" fill="#fff"/>
-          <circle cx="35" cy="40" r="3" fill="#000"/><circle cx="65" cy="40" r="3" fill="#000"/>
-          <rect x="25" y="32" width="22" height="14" rx="3" fill="#111" stroke="#ffd700" stroke-width="2"/>
-          <rect x="53" y="32" width="22" height="14" rx="3" fill="#111" stroke="#ffd700" stroke-width="2"/>
-          <line x1="47" y1="38" x2="53" y2="38" stroke="#ffd700" stroke-width="2"/>
-          <path d="M 35 65 Q 50 80 65 65" fill="none" stroke="#7a0000" stroke-width="4" stroke-linecap="round"/>
-          <polygon points="46,65 50,72 54,65" fill="#fff"/>
-          <path d="M 50 15 L 50 25 M 40 18 L 45 25 M 60 18 L 55 25" stroke="#441100" stroke-width="3"/>
-        </svg>
+      <div class="mascot-wrapper">
+        <div class="tiger-mascot">🐯</div>
+        <div class="vegas-badge">777 VEGAS</div>
       </div>
+
       <div class="logo-banner">
-        <span>FORTUNE</span>
-        <h1>TIGER</h1>
+        <span class="sub-title">LAS VEGAS & ORIENTAL</span>
+        <h1 class="main-title">FORTUNE TIGER</h1>
       </div>
     </header>
 
@@ -43,14 +38,14 @@
 
         <div class="grid-3x3">
           <div class="cell" id="c00"><div class="symbol-wrapper">🐯</div></div>
-          <div class="cell" id="c01"><div class="symbol-wrapper">🏺</div></div>
-          <div class="cell" id="c02"><div class="symbol-wrapper">🟢</div></div>
-          <div class="cell" id="c10"><div class="symbol-wrapper">🧧</div></div>
+          <div class="cell" id="c01"><div class="symbol-wrapper">🎰</div></div>
+          <div class="cell" id="c02"><div class="symbol-wrapper">💎</div></div>
+          <div class="cell" id="c10"><div class="symbol-wrapper">🍒</div></div>
           <div class="cell" id="c11"><div class="symbol-wrapper">🐯</div></div>
           <div class="cell" id="c12"><div class="symbol-wrapper">🪙</div></div>
-          <div class="cell" id="c20"><div class="symbol-wrapper">🟢</div></div>
+          <div class="cell" id="c20"><div class="symbol-wrapper">💎</div></div>
           <div class="cell" id="c21"><div class="symbol-wrapper">🧧</div></div>
-          <div class="cell" id="c22"><div class="symbol-wrapper">🐯</div></div>
+          <div class="cell" id="c22"><div class="symbol-wrapper">🎰</div></div>
         </div>
 
         <div class="line-indicators right">
@@ -60,50 +55,54 @@
     </main>
 
     <div class="status-banner">
-      <span id="banner-text">Gira para obter a Sorte do Tigre!</span>
+      <span id="banner-text">Faça sua aposta a partir de R$ 1,00 e gire!</span>
     </div>
 
     <footer class="footer-panel">
       <div class="stats-ribbon">
         <div class="stat-box">
-          <span class="stat-label">CARTEIRA</span>
+          <span class="stat-label">SALDO DISPONÍVEL</span>
           <span class="stat-value" id="saldo">R$ 100,00</span>
         </div>
         <div class="stat-box highlight">
-          <span class="stat-label">APOSTA TOTAL</span>
+          <span class="stat-label">APOSTA (MÍN R$ 1)</span>
           <span class="stat-value" id="aposta-display">R$ 1,00</span>
         </div>
         <div class="stat-box win">
-          <span class="stat-label">GANHO</span>
+          <span class="stat-label">PRÊMIO</span>
           <span class="stat-value" id="win-display">R$ 0,00</span>
         </div>
       </div>
 
       <div class="action-controls">
-        <button class="btn-step" onclick="alterarAposta(-0.50)">-</button>
+        <button class="btn-step" onclick="alterarAposta(-1.00)">-</button>
         <button id="btn-spin" onclick="girar()">
           <span class="spin-text">GIRAR</span>
         </button>
-        <button class="btn-step" onclick="alterarAposta(0.50)">+</button>
+        <button class="btn-step" onclick="alterarAposta(1.00)">+</button>
       </div>
     </footer>
   </div>
 
-  <!-- Modal Depósito PIX -->
+  <!-- Modal Depósito PIX Real (Sem botão simular) -->
   <div class="modal-overlay" id="modal-deposit">
     <div class="modal-content">
       <button class="modal-close" onclick="fecharModal('modal-deposit')">✕</button>
-      <h2>DEPÓSITO PIX</h2>
+      <h2>DEPÓSITO PIX INSTANTÂNEO</h2>
       <div class="input-group">
-        <label>Valor do Depósito (R$)</label>
-        <input type="number" id="dep-val" value="20.00" min="5" step="5">
+        <label>Valor do Depósito (Mínimo R$ 5,00)</label>
+        <input type="number" id="dep-val" value="5.00" min="5" step="5">
       </div>
-      <button class="btn-action" onclick="gerarPix()">GERAR QR CODE</button>
+      <button class="btn-action" onclick="gerarPix()">GERAR PIX</button>
+      
       <div id="pix-result" class="pix-result hidden">
         <img id="qr-img" src="" alt="QR Code PIX">
         <input type="text" id="pix-code" readonly>
         <button class="btn-action secondary" onclick="copiarPix()">COPIAR CHAVE PIX</button>
-        <button class="btn-action success" onclick="simularPagamento()">SIMULAR PAGAMENTO PAGO</button>
+        <div class="pix-status-loader">
+          <div class="spinner"></div>
+          <span id="pix-status-txt">Aguardando pagamento no app do banco...</span>
+        </div>
       </div>
     </div>
   </div>
@@ -115,11 +114,11 @@
       <h2>SOLICITAR SAQUE</h2>
       <div class="input-group">
         <label>Valor do Saque (R$)</label>
-        <input type="number" id="saque-val" value="50.00" min="10">
+        <input type="number" id="saque-val" value="10.00" min="10">
       </div>
       <div class="input-group">
-        <label>Chave PIX (CPF/Telefone/E-mail)</label>
-        <input type="text" id="saque-chave" placeholder="Digite sua chave PIX">
+        <label>Chave PIX (CPF / Telefone / E-mail)</label>
+        <input type="text" id="saque-chave" placeholder="Sua chave PIX">
       </div>
       <button class="btn-action" onclick="solicitarSaque()">CONFIRMAR SAQUE</button>
     </div>
