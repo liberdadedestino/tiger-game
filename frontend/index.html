@@ -3,23 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Fortune Tiger - Official Edition</title>
+  <title>Fortune Tiger - PG Soft Official Edition</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- Canvas de Efeitos Globais (Chuva de Moedas / Vitória) -->
   <canvas id="particle-canvas"></canvas>
 
-  <div class="casino-bg">
-    <div class="light-ray left"></div>
-    <div class="light-ray right"></div>
-  </div>
+  <div class="casino-bg"></div>
 
   <div class="game-container">
-    <!-- Topo: Perfil e Ações -->
+    <!-- Top Navigation -->
     <header class="top-nav">
       <div class="user-badge" onclick="abrirModal('modal-auth')">
-        <span class="user-avatar">🐯</span>
+        <span class="user-icon">👤</span>
         <span id="user-display-name">Entrar</span>
       </div>
       <div class="nav-actions">
@@ -29,36 +25,69 @@
       </div>
     </header>
 
-    <!-- Estágio Oriental com Tigre 3D Vetorial -->
+    <!-- Templo Oriental PG Soft: Telhado Verde e Mascote Tigre HD -->
     <div class="pagoda-stage">
       <div class="pagoda-roof">
-        <div class="roof-ornament-center"></div>
+        <div class="roof-tiles"></div>
+        <div class="roof-ridge"></div>
       </div>
       
-      <div class="tiger-mascot-box">
-        <svg class="tiger-svg" viewBox="0 0 120 120">
-          <defs>
-            <radialGradient id="goldGlow" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stop-color="#fff6b3"/>
-              <stop offset="100%" stop-color="#ff9900"/>
-            </radialGradient>
-          </defs>
-          <circle cx="60" cy="60" r="50" fill="url(#goldGlow)" opacity="0.3"/>
-          <circle cx="60" cy="60" r="42" fill="#ff9900" stroke="#ffd700" stroke-width="4"/>
-          <polygon points="25,25 40,15 45,35" fill="#e67e00" stroke="#ffd700" stroke-width="2"/>
-          <polygon points="95,25 80,15 75,35" fill="#e67e00" stroke="#ffd700" stroke-width="2"/>
-          <rect x="26" y="42" width="30" height="20" rx="6" fill="#111" stroke="#ffd700" stroke-width="2.5"/>
-          <rect x="64" y="42" width="30" height="20" rx="6" fill="#111" stroke="#ffd700" stroke-width="2.5"/>
-          <line x1="56" y1="50" x2="64" y2="50" stroke="#ffd700" stroke-width="3"/>
-          <path d="M 40 82 Q 60 102 80 82" fill="none" stroke="#7a0000" stroke-width="5" stroke-linecap="round"/>
-          <polygon points="54,82 60,92 66,82" fill="#fff"/>
-          <path d="M 60 20 L 60 32 M 48 24 L 54 32 M 72 24 L 66 32" stroke="#331100" stroke-width="3.5" stroke-linecap="round"/>
-        </svg>
-        <div class="tiger-tag">WILD 10X</div>
+      <div class="mascot-stage">
+        <div class="tiger-mascot-hd">
+          <!-- Mascote Ilustrado em SVG HD -->
+          <svg class="tiger-render" viewBox="0 0 160 160">
+            <defs>
+              <radialGradient id="bodyGrad" cx="50%" cy="40%" r="60%">
+                <stop offset="0%" stop-color="#ffbf00"/>
+                <stop offset="70%" stop-color="#ff7700"/>
+                <stop offset="100%" stop-color="#cc4400"/>
+              </radialGradient>
+              <linearGradient id="goldCap" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#fff5aa"/>
+                <stop offset="50%" stop-color="#ffd700"/>
+                <stop offset="100%" stop-color="#996600"/>
+              </linearGradient>
+            </defs>
+
+            <!-- Orelhas com Interior Rosa -->
+            <path d="M 32 36 Q 20 10 44 18 Z" fill="url(#bodyGrad)" stroke="#441100" stroke-width="2.5"/>
+            <path d="M 34 32 Q 26 16 40 22 Z" fill="#ff9999"/>
+            <path d="M 128 36 Q 140 10 116 18 Z" fill="url(#bodyGrad)" stroke="#441100" stroke-width="2.5"/>
+            <path d="M 126 32 Q 134 16 120 22 Z" fill="#ff9999"/>
+
+            <!-- Cabeça do Tigre -->
+            <ellipse cx="80" cy="80" rx="54" ry="46" fill="url(#bodyGrad)" stroke="#3a0900" stroke-width="3"/>
+            
+            <!-- Listras da Testa -->
+            <path d="M 80 34 L 80 48 M 68 38 L 74 48 M 92 38 L 86 48" stroke="#220500" stroke-width="4" stroke-linecap="round"/>
+            
+            <!-- Bochechas Brancas -->
+            <ellipse cx="58" cy="95" rx="18" ry="14" fill="#fff9e6"/>
+            <ellipse cx="102" cy="95" rx="18" ry="14" fill="#fff9e6"/>
+            
+            <!-- Focinho e Nariz -->
+            <polygon points="74,86 86,86 80,94" fill="#ff4466" rx="2"/>
+            
+            <!-- Óculos Escuros Estilo PG Soft -->
+            <path d="M 36 56 Q 56 50 78 56 Q 78 76 56 76 Q 36 76 36 56 Z" fill="#151515" stroke="url(#goldCap)" stroke-width="3.5"/>
+            <path d="M 82 56 Q 104 50 124 56 Q 124 76 104 76 Q 82 76 82 56 Z" fill="#151515" stroke="url(#goldCap)" stroke-width="3.5"/>
+            <line x1="78" y1="62" x2="82" y2="62" stroke="url(#goldCap)" stroke-width="4"/>
+            <path d="M 40 60 L 52 68" stroke="#ffffff" stroke-width="2" opacity="0.6"/>
+            <path d="M 86 60 L 98 68" stroke="#ffffff" stroke-width="2" opacity="0.6"/>
+
+            <!-- Sorriso Aberto com Dente -->
+            <path d="M 58 98 Q 80 122 102 98 C 96 116 64 116 58 98 Z" fill="#660000" stroke="#330000" stroke-width="2"/>
+            <path d="M 72 98 L 76 105 L 80 98 Z" fill="#ffffff"/>
+
+            <!-- Casaco Vermelho Imperial -->
+            <path d="M 40 120 Q 80 108 120 120 L 130 155 Q 80 165 30 155 Z" fill="#aa0000" stroke="url(#goldCap)" stroke-width="3"/>
+          </svg>
+        </div>
+        <div class="tiger-banner-tag">WILD 10X</div>
       </div>
     </div>
 
-    <!-- Moldura dos Rolos 3x3 -->
+    <!-- Moldura Principal dos Rolos 3x3 -->
     <main class="slot-machine">
       <div class="pg-frame">
         <div class="pillar left">
@@ -68,15 +97,15 @@
         </div>
 
         <div class="grid-3x3">
-          <div class="cell" id="c00"><div class="symbol-wrapper">🐯</div></div>
-          <div class="cell" id="c01"><div class="symbol-wrapper">🎰</div></div>
-          <div class="cell" id="c02"><div class="symbol-wrapper">💎</div></div>
-          <div class="cell" id="c10"><div class="symbol-wrapper">🍒</div></div>
-          <div class="cell" id="c11"><div class="symbol-wrapper">🐯</div></div>
-          <div class="cell" id="c12"><div class="symbol-wrapper">🪙</div></div>
-          <div class="cell" id="c20"><div class="symbol-wrapper">💎</div></div>
-          <div class="cell" id="c21"><div class="symbol-wrapper">🧧</div></div>
-          <div class="cell" id="c22"><div class="symbol-wrapper">🎰</div></div>
+          <div class="cell" id="c00"></div>
+          <div class="cell" id="c01"></div>
+          <div class="cell" id="c02"></div>
+          <div class="cell" id="c10"></div>
+          <div class="cell" id="c11"></div>
+          <div class="cell" id="c12"></div>
+          <div class="cell" id="c20"></div>
+          <div class="cell" id="c21"></div>
+          <div class="cell" id="c22"></div>
         </div>
 
         <div class="pillar right">
@@ -86,12 +115,12 @@
       </div>
     </main>
 
-    <!-- Banner de Notificações Dinâmicas -->
+    <!-- Banner Central de Notificação -->
     <div class="fortune-banner">
       <span id="banner-text">Sorte do Tigre! Faça sua aposta e gire!</span>
     </div>
 
-    <!-- Painel Inferior de Controles PG Soft -->
+    <!-- Rodapé: Saldo, Aposta e Botão de Giro Circular -->
     <footer class="footer-panel">
       <div class="stats-ribbon">
         <div class="stat-box">
@@ -131,11 +160,9 @@
       <button class="btn-social google" onclick="loginSocial('Google')">
         <span class="social-icon">🌐</span> Continuar com Google
       </button>
-
       <button class="btn-social instagram" onclick="loginSocial('Instagram')">
         <span class="social-icon">📸</span> Continuar com Instagram
       </button>
-
       <button class="btn-social facebook" onclick="loginSocial('Facebook')">
         <span class="social-icon">📘</span> Continuar com Facebook
       </button>

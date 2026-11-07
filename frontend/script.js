@@ -3,9 +3,62 @@ let usuarioAtual = JSON.parse(localStorage.getItem('user_tigrinho')) || null;
 let apostaAtual = 1.00;
 let transactionPollInterval = null;
 let audioEnabled = true;
-const EMOJIS = ['🐯', '🎰', '💎', '🍒', '🪙', '🧧'];
 
-// SINTETIZADOR DE ÁUDIO WEB AUDIO API (Sem dependência de arquivos externos)
+// RENDERS VETORIAIS DOS 7 SÍMBOLOS OFICIAIS DO FORTUNE TIGER
+const SVG_SIMBOLOS = {
+  WILD: `<svg class="symbol-svg" viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="45" fill="#ff8800" stroke="#ffd700" stroke-width="4"/>
+          <ellipse cx="50" cy="70" rx="30" ry="20" fill="#fff5cc"/>
+          <path d="M 25 35 Q 45 30 75 35 Q 75 55 50 55 Q 25 55 25 35 Z" fill="#111" stroke="#ffd700" stroke-width="2"/>
+          <path d="M 30 75 Q 50 90 70 75" stroke="#800000" stroke-width="4" fill="none"/>
+          <rect x="35" y="10" width="30" height="15" rx="3" fill="#cc0000" stroke="#ffd700"/>
+          <text x="50" y="22" font-size="10" fill="#ffd700" text-anchor="middle" font-weight="bold">WILD</text>
+         </svg>`,
+  SYCEE: `<svg class="symbol-svg" viewBox="0 0 100 100">
+           <!-- Lingote de Ouro (Sycee / Yuanbao) -->
+           <path d="M 15 45 Q 50 25 85 45 Q 95 75 50 80 Q 5 75 15 45 Z" fill="url(#goldGrad)" stroke="#b8860b" stroke-width="3"/>
+           <ellipse cx="50" cy="45" rx="25" ry="12" fill="#fff3a8"/>
+           <defs>
+             <linearGradient id="goldGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+               <stop offset="0%" stop-color="#ffee77"/><stop offset="100%" stop-color="#d4af37"/>
+             </linearGradient>
+           </defs>
+          </svg>`,
+  BAG: `<svg class="symbol-svg" viewBox="0 0 100 100">
+         <!-- Saco de Moedas Vermelho/Dourado -->
+         <path d="M 30 35 Q 50 25 70 35 L 85 75 Q 85 90 50 90 Q 15 90 15 75 Z" fill="#cc0000" stroke="#ffd700" stroke-width="3"/>
+         <path d="M 35 35 Q 50 42 65 35" stroke="#ffd700" stroke-width="4" fill="none"/>
+         <circle cx="50" cy="62" r="14" fill="#ffd700"/>
+         <text x="50" y="67" font-size="14" fill="#cc0000" text-anchor="middle" font-weight="bold">福</text>
+        </svg>`,
+  JADE: `<svg class="symbol-svg" viewBox="0 0 100 100">
+          <!-- Amuleto de Jade Verde -->
+          <path d="M 30 20 L 70 20 L 80 50 L 50 85 L 20 50 Z" fill="#00b359" stroke="#ffd700" stroke-width="3"/>
+          <circle cx="50" cy="45" r="15" fill="none" stroke="#ffd700" stroke-width="3"/>
+         </svg>`,
+  ENVELOPE: `<svg class="symbol-svg" viewBox="0 0 100 100">
+              <!-- Envelope Vermelho Hongbao -->
+              <rect x="25" y="20" width="50" height="65" rx="6" fill="#e60000" stroke="#ffd700" stroke-width="3"/>
+              <path d="M 25 20 L 50 48 L 75 20" fill="#cc0000" stroke="#ffd700" stroke-width="2"/>
+              <circle cx="50" cy="55" r="10" fill="#ffd700"/>
+             </svg>`,
+  FIRECRACKER: `<svg class="symbol-svg" viewBox="0 0 100 100">
+                 <!-- Fogos de Artifício Azuis e Vermelhos -->
+                 <rect x="25" y="35" width="16" height="40" rx="3" fill="#2a4bd7" stroke="#ffd700" stroke-width="2"/>
+                 <rect x="44" y="25" width="16" height="40" rx="3" fill="#e60000" stroke="#ffd700" stroke-width="2"/>
+                 <rect x="63" y="35" width="16" height="40" rx="3" fill="#2a4bd7" stroke="#ffd700" stroke-width="2"/>
+                 <path d="M 33 35 Q 50 15 52 10" stroke="#ffd700" stroke-width="2" fill="none"/>
+                </svg>`,
+  MANDARIN: `<svg class="symbol-svg" viewBox="0 0 100 100">
+              <!-- Tangerina / Laranja Dourada -->
+              <circle cx="50" cy="55" r="32" fill="#ff7700" stroke="#cc5500" stroke-width="3"/>
+              <path d="M 50 23 Q 60 15 65 22 Q 55 25 50 23 Z" fill="#009933"/>
+             </svg>`
+};
+
+const SIMBOLOS_KEYS = Object.keys(SVG_SIMBOLOS);
+
+// WEB AUDIO API
 const AudioContext = window.AudioContext || window.webkitAudioContext;
 let audioCtx = null;
 
@@ -22,7 +75,6 @@ function playSound(type) {
     const gain = audioCtx.createGain();
     osc.connect(gain);
     gain.connect(audioCtx.destination);
-
     const now = audioCtx.currentTime;
 
     if (type === 'click') {
@@ -36,7 +88,7 @@ function playSound(type) {
       osc.type = 'triangle';
       osc.frequency.setValueAtTime(150, now);
       osc.frequency.linearRampToValueAtTime(300, now + 0.1);
-      gain.gain.setValueAtTime(0.1, now);
+      gain.gain.setValueAtTime(0.08, now);
       gain.gain.linearRampToValueAtTime(0.01, now + 0.1);
       osc.start(now);
       osc.stop(now + 0.1);
@@ -44,7 +96,7 @@ function playSound(type) {
       osc.type = 'square';
       osc.frequency.setValueAtTime(120, now);
       osc.frequency.exponentialRampToValueAtTime(40, now + 0.08);
-      gain.gain.setValueAtTime(0.4, now);
+      gain.gain.setValueAtTime(0.35, now);
       gain.gain.linearRampToValueAtTime(0.01, now + 0.08);
       osc.start(now);
       osc.stop(now + 0.08);
@@ -70,7 +122,7 @@ function toggleAudio() {
   document.getElementById('btn-sound').innerText = audioEnabled ? '🔊' : '🔇';
 }
 
-// MOTOR DE PARTÍCULAS CANVAS (Chuva de Moedas Douradas)
+// CANVAS DE MOEDAS
 const canvas = document.getElementById('particle-canvas');
 const ctx = canvas.getContext('2d');
 let particles = [];
@@ -114,8 +166,9 @@ function animateParticles() {
   if (particles.length > 0) requestAnimationFrame(animateParticles);
 }
 
-// INICIALIZAÇÃO DA APLICAÇÃO
+// RENDERIZAÇÃO INICIAL DAS CÉLULAS
 document.addEventListener('DOMContentLoaded', () => {
+  renderizarGradeInicial();
   if (usuarioAtual) {
     atualizarUIUsuario();
     atualizarSaldo();
@@ -123,6 +176,21 @@ document.addEventListener('DOMContentLoaded', () => {
     abrirModal('modal-auth');
   }
 });
+
+function renderizarGradeInicial() {
+  const padrao = [
+    ['SYCEE', 'WILD', 'JADE'],
+    ['BAG', 'WILD', 'ENVELOPE'],
+    ['FIRECRACKER', 'MANDARIN', 'SYCEE']
+  ];
+
+  for (let r = 0; r < 3; r++) {
+    for (let c = 0; c < 3; c++) {
+      const cell = document.getElementById(`c${r}${c}`);
+      if (cell) cell.innerHTML = SVG_SIMBOLOS[padrao[r][c]];
+    }
+  }
+}
 
 function abrirModal(id) { document.getElementById(id).classList.add('active'); }
 function fecharModal(id) { 
@@ -183,7 +251,7 @@ async function atualizarSaldo() {
   } catch (e) {}
 }
 
-// GIRO DOS SLOTS COM ANIMAÇÃO CONTINUA (4s) E PARADA SEQUENCIAL COLUNA A COLUNA
+// GIRO COM ANIMAÇÃO CONTINUA (4s) E PARADA SEQUENCIAL COLUNA A COLUNA
 async function girar() {
   if (!usuarioAtual) {
     abrirModal('modal-auth');
@@ -203,7 +271,6 @@ async function girar() {
     [document.getElementById('c02'), document.getElementById('c12'), document.getElementById('c22')]
   ];
 
-  // Ativa o estado de rotação em todas as células
   colunas.flat().forEach(cell => {
     cell.classList.remove('winner', 'bounce');
     cell.classList.add('spinning');
@@ -213,8 +280,8 @@ async function girar() {
 
   const anim = setInterval(() => {
     colunas.flat().forEach(cell => {
-      const wrapper = cell.querySelector('.symbol-wrapper');
-      if (wrapper) wrapper.innerText = EMOJIS[Math.floor(Math.random() * EMOJIS.length)];
+      const randomKey = SIMBOLOS_KEYS[Math.floor(Math.random() * SIMBOLOS_KEYS.length)];
+      cell.innerHTML = SVG_SIMBOLOS[randomKey];
     });
   }, 60);
 
@@ -227,13 +294,12 @@ async function girar() {
 
     const data = await res.json();
 
-    // Cronograma de parada sequencial dos 3 rolos (Total 4 segundos)
     setTimeout(() => {
       // Parada da Coluna 1
       colunas[0].forEach((cell, r) => {
         cell.classList.remove('spinning');
         cell.classList.add('bounce');
-        if (data.matriz) cell.querySelector('.symbol-wrapper').innerText = data.matriz[r][0].emoji;
+        if (data.matriz) cell.innerHTML = SVG_SIMBOLOS[data.matriz[r][0].id] || SVG_SIMBOLOS['MANDARIN'];
       });
       playSound('stopReel');
 
@@ -242,7 +308,7 @@ async function girar() {
         colunas[1].forEach((cell, r) => {
           cell.classList.remove('spinning');
           cell.classList.add('bounce');
-          if (data.matriz) cell.querySelector('.symbol-wrapper').innerText = data.matriz[r][1].emoji;
+          if (data.matriz) cell.innerHTML = SVG_SIMBOLOS[data.matriz[r][1].id] || SVG_SIMBOLOS['MANDARIN'];
         });
         playSound('stopReel');
 
@@ -253,11 +319,10 @@ async function girar() {
           colunas[2].forEach((cell, r) => {
             cell.classList.remove('spinning');
             cell.classList.add('bounce');
-            if (data.matriz) cell.querySelector('.symbol-wrapper').innerText = data.matriz[r][2].emoji;
+            if (data.matriz) cell.innerHTML = SVG_SIMBOLOS[data.matriz[r][2].id] || SVG_SIMBOLOS['MANDARIN'];
           });
           playSound('stopReel');
 
-          // Processamento do Saldo e Vitória
           if (res.ok) {
             usuarioAtual.saldo = data.novoSaldo;
             localStorage.setItem('user_tigrinho', JSON.stringify(usuarioAtual));
@@ -279,7 +344,7 @@ async function girar() {
           btn.disabled = false;
         }, 500);
       }, 500);
-    }, 3000); // 3s inicio da parada + 1s finalizacao (Total 4s)
+    }, 3000);
 
   } catch (err) {
     clearInterval(anim);
@@ -290,7 +355,7 @@ async function girar() {
   }
 }
 
-// INTEGRAÇÃO PIX REAL E POLLING
+// PIX & SAQUE
 async function gerarPix() {
   if (!usuarioAtual) {
     abrirModal('modal-auth');
