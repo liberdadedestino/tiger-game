@@ -3,39 +3,62 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Fortune Tiger - PG Style</title>
+  <title>Fortune Tiger - Official Edition</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="casino-bg"></div>
+  <!-- Canvas de Efeitos Globais (Chuva de Moedas / Vitória) -->
+  <canvas id="particle-canvas"></canvas>
+
+  <div class="casino-bg">
+    <div class="light-ray left"></div>
+    <div class="light-ray right"></div>
+  </div>
 
   <div class="game-container">
-    <!-- Topo: Menu de usuário e depósitos -->
+    <!-- Topo: Perfil e Ações -->
     <header class="top-nav">
       <div class="user-badge" onclick="abrirModal('modal-auth')">
-        <span class="user-icon">👤</span>
+        <span class="user-avatar">🐯</span>
         <span id="user-display-name">Entrar</span>
       </div>
       <div class="nav-actions">
+        <button id="btn-sound" class="sound-toggle" onclick="toggleAudio()">🔊</button>
         <button class="nav-btn deposit" onclick="abrirModal('modal-deposit')">+ DEPOSITAR</button>
         <button class="nav-btn withdraw" onclick="abrirModal('modal-withdraw')">SAQUE</button>
       </div>
     </header>
 
-    <!-- Estrutura do Templo com o Mascote no Topo -->
-    <div class="pagoda-header">
+    <!-- Estágio Oriental com Tigre 3D Vetorial -->
+    <div class="pagoda-stage">
       <div class="pagoda-roof">
-        <div class="roof-tiles"></div>
+        <div class="roof-ornament-center"></div>
       </div>
-      <div class="mascot-stage">
-        <div class="tiger-character">
-          <div class="tiger-face">🐯</div>
-          <div class="tiger-tag">WILD 10X</div>
-        </div>
+      
+      <div class="tiger-mascot-box">
+        <svg class="tiger-svg" viewBox="0 0 120 120">
+          <defs>
+            <radialGradient id="goldGlow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#fff6b3"/>
+              <stop offset="100%" stop-color="#ff9900"/>
+            </radialGradient>
+          </defs>
+          <circle cx="60" cy="60" r="50" fill="url(#goldGlow)" opacity="0.3"/>
+          <circle cx="60" cy="60" r="42" fill="#ff9900" stroke="#ffd700" stroke-width="4"/>
+          <polygon points="25,25 40,15 45,35" fill="#e67e00" stroke="#ffd700" stroke-width="2"/>
+          <polygon points="95,25 80,15 75,35" fill="#e67e00" stroke="#ffd700" stroke-width="2"/>
+          <rect x="26" y="42" width="30" height="20" rx="6" fill="#111" stroke="#ffd700" stroke-width="2.5"/>
+          <rect x="64" y="42" width="30" height="20" rx="6" fill="#111" stroke="#ffd700" stroke-width="2.5"/>
+          <line x1="56" y1="50" x2="64" y2="50" stroke="#ffd700" stroke-width="3"/>
+          <path d="M 40 82 Q 60 102 80 82" fill="none" stroke="#7a0000" stroke-width="5" stroke-linecap="round"/>
+          <polygon points="54,82 60,92 66,82" fill="#fff"/>
+          <path d="M 60 20 L 60 32 M 48 24 L 54 32 M 72 24 L 66 32" stroke="#331100" stroke-width="3.5" stroke-linecap="round"/>
+        </svg>
+        <div class="tiger-tag">WILD 10X</div>
       </div>
     </div>
 
-    <!-- Moldura Principal do Jogo 3x3 -->
+    <!-- Moldura dos Rolos 3x3 -->
     <main class="slot-machine">
       <div class="pg-frame">
         <div class="pillar left">
@@ -46,9 +69,9 @@
 
         <div class="grid-3x3">
           <div class="cell" id="c00"><div class="symbol-wrapper">🐯</div></div>
-          <div class="cell" id="c01"><div class="symbol-wrapper">🏺</div></div>
-          <div class="cell" id="c02"><div class="symbol-wrapper">🟢</div></div>
-          <div class="cell" id="c10"><div class="symbol-wrapper">🧧</div></div>
+          <div class="cell" id="c01"><div class="symbol-wrapper">🎰</div></div>
+          <div class="cell" id="c02"><div class="symbol-wrapper">💎</div></div>
+          <div class="cell" id="c10"><div class="symbol-wrapper">🍒</div></div>
           <div class="cell" id="c11"><div class="symbol-wrapper">🐯</div></div>
           <div class="cell" id="c12"><div class="symbol-wrapper">🪙</div></div>
           <div class="cell" id="c20"><div class="symbol-wrapper">💎</div></div>
@@ -63,12 +86,12 @@
       </div>
     </main>
 
-    <!-- Banner Central de Mensagens do Tigre -->
+    <!-- Banner de Notificações Dinâmicas -->
     <div class="fortune-banner">
-      <span id="banner-text">Sorte do Tigre! Faça sua jogada!</span>
+      <span id="banner-text">Sorte do Tigre! Faça sua aposta e gire!</span>
     </div>
 
-    <!-- Rodapé: Carteira, Aposta e Botão de Giro Circular -->
+    <!-- Painel Inferior de Controles PG Soft -->
     <footer class="footer-panel">
       <div class="stats-ribbon">
         <div class="stat-box">
@@ -98,12 +121,12 @@
     </footer>
   </div>
 
-  <!-- Modal Login Social (Google, Instagram, Facebook) -->
+  <!-- Modal Login Social -->
   <div class="modal-overlay" id="modal-auth">
     <div class="modal-content">
       <button class="modal-close" onclick="fecharModal('modal-auth')">✕</button>
       <h2>ENTRAR / CADASTRAR</h2>
-      <p class="auth-sub">Conecte sua conta social para vincular seu saldo de jogo</p>
+      <p class="auth-sub">Conecte sua conta para vincular seu saldo de jogo</p>
 
       <button class="btn-social google" onclick="loginSocial('Google')">
         <span class="social-icon">🌐</span> Continuar com Google
@@ -136,7 +159,7 @@
         <button class="btn-action secondary" onclick="copiarPix()">COPIAR CHAVE PIX</button>
         <div class="pix-status-loader">
           <div class="spinner"></div>
-          <span id="pix-status-txt">Aguardando pagamento no aplicativo do banco...</span>
+          <span id="pix-status-txt">Aguardando pagamento no app do banco...</span>
         </div>
       </div>
     </div>
