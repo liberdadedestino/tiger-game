@@ -1,17 +1,16 @@
 const express = require('express');
 const cors = require('cors');
-const axios = require('axios'); // Para requisições HTTPS à API do Gateway
+const axios = require('axios');
 require('dotenv').config();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.get('/', (req, res) => res.send('API Tigrinho 3x3 rodando com Gateway Real!'));
+app.get('/', (req, res) => res.send('API Tigrinho 3x3 rodando com Pushin Pay Real!'));
 
-// Credenciais do Gateway (Definidas via Variáveis de Ambiente no Render)
-const GATEWAY_API_KEY = process.env.GATEWAY_API_KEY || 'SUA_CHAVE_API_AQUI';
-const GATEWAY_BASE_URL = process.env.GATEWAY_BASE_URL || 'https://api.pushinpay.com.br/api'; 
+const GATEWAY_API_KEY = process.env.GATEWAY_API_KEY || '';
+const GATEWAY_BASE_URL = process.env.GATEWAY_BASE_URL || 'https://api.pushinpay.com.br/api';
 
 const SIMBOLOS = [
   { id: 'WILD', peso: 5, multiplicador: 50, emoji: '🐯' },
@@ -22,7 +21,7 @@ const SIMBOLOS = [
 ];
 
 const usuarios = { "user123": { saldo: 100.00 } };
-const cobrancasPendentes = {}; // Guarda IDs de cobrança para vincular no Webhook
+const cobrancasPendentes = {};
 
 function sortearSimbolo() {
   const pesoTotal = SIMBOLOS.reduce((acc, s) => acc + s.peso, 0);
@@ -45,7 +44,6 @@ function validarLinha(s1, s2, s3) {
   return 0;
 }
 
-// Rota do Giro do Slot
 app.post('/api/spin', (req, res) => {
   const { userId, aposta } = req.body;
   if (!usuarios[userId] || usuarios[userId].saldo < aposta) {
@@ -91,49 +89,59 @@ app.post('/api/spin', (req, res) => {
   });
 });
 
-// Endpoint REAL: Criar Cobrança PIX no Gateway
+// Endpoint Depósito PIX Real via Pushin Pay
 app.post('/api/deposit/pix', async (req, res) => {
   const { userId, valor } = req.body;
   if (!valor || valor < 5) {
     return res.status(400).json({ error: 'Valor mínimo de depósito é R$ 5,00' });
   }
 
+  const token = GATEWAY_API_KEY;
+  if (!token) {
+    return res.status(500).json({ error: 'GATEWAY_API_KEY não configurada no Render.' });
+  }
+
   try {
-    // Chamada HTTP para o Gateway de Pagamento
+    const valorEmCentavos = Math.round(parseFloat(valor) * 100);
     const response = await axios.post(`${GATEWAY_BASE_URL}/pix/cashIn`, {
-      value: Math.round(valor * 100), // Valor em centavos
+      value: valorEmCentavos,
       webhook_url: 'https://tiger-game.onrender.com/api/webhook/pix'
     }, {
       headers: {
-        'Authorization': `Bearer ${GATEWAY_API_KEY}`,
-        'Content-Type': 'application/json'
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
       }
     });
 
-    const { id, qrcode, qr_code_base64 } = response.data;
-    
-    // Mapeia a transação para o usuário
-    cobrancasPendentes[id] = { userId, valor: parseFloat(valor), status: 'PENDING' };
+    const data = response.data;
+    const pixCopiaECola = data.qr_code || data.qrcode || data.pix_copia_cola || '';
+    const idTransacao = data.id || data.transaction_id || '';
+
+    cobrancasPendentes[idTransacao] = { userId, valor: parseFloat(valor), status: 'PENDING' };
 
     return res.json({
-      transactionId: id,
+      message: 'PIX real gerado com sucesso via Pushin Pay',
+      transactionId: idTransacao,
       valor: parseFloat(valor),
-      pixCopiaECola: qrcode,
-      qrCodeUrl: qr_code_base64 || `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(qrcode)}`
+      pixCopiaECola: pixCopiaECola,
+      qrCodeUrl: data.qr_code_base64 || `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(pixCopiaECola)}`
     });
 
   } catch (error) {
-    console.error('Erro na API de Pagamentos:', error.response?.data || error.message);
-    return res.status(500).json({ error: 'Erro ao gerar PIX no gateway de pagamento.' });
+    console.error('Erro na API Pushin Pay:', error.response?.data || error.message);
+    return res.status(500).json({ 
+      error: 'Erro ao gerar PIX na Pushin Pay.', 
+      details: error.response?.data || error.message 
+    });
   }
 });
 
-// Endpoint REAL: Webhook recebido do Gateway quando o PIX é pago
+// Webhook Real Pushin Pay
 app.post('/api/webhook/pix', (req, res) => {
   const { id, status, value } = req.body;
 
-  // Verifica se o pagamento foi confirmado
-  if (status === 'PAID' || status === 'CONFIRMED') {
+  if (status === 'paid' || status === 'PAID' || status === 'CONFIRMED') {
     const cobranca = cobrancasPendentes[id];
     if (cobranca && cobranca.status === 'PENDING') {
       const userId = cobranca.userId;
@@ -143,14 +151,14 @@ app.post('/api/webhook/pix', (req, res) => {
         usuarios[userId].saldo += valorDepositado;
       }
       cobranca.status = 'PAID';
-      console.log(`Depósito de R$ ${valorDepositado} confirmado para o usuário ${userId}`);
+      console.log(`Depósito de R$ ${valorDepositado} creditado para o usuário ${userId}`);
     }
   }
 
-  res.sendStatus(200); // Retorna 200 OK para o Gateway não reenviar
+  res.sendStatus(200);
 });
 
-// Endpoint: Saque PIX
+// Saque
 app.post('/api/withdraw', (req, res) => {
   const { userId, valor, chavePix } = req.body;
   if (!usuarios[userId] || usuarios[userId].saldo < valor) {
