@@ -3,47 +3,52 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Vegas Fortune Tiger - Cassino</title>
+  <title>Fortune Tiger - PG Style</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="casino-bg"></div>
 
   <div class="game-container">
-    <header class="mascot-header">
-      <div class="top-nav">
-        <div class="user-badge" onclick="abrirModal('modal-auth')">
-          <span class="user-icon">👤</span>
-          <span id="user-display-name">Entrar</span>
-        </div>
-        <div class="nav-actions">
-          <button class="nav-btn deposit" onclick="abrirModal('modal-deposit')">+ DEPOSITAR</button>
-          <button class="nav-btn withdraw" onclick="abrirModal('modal-withdraw')">SAQUE</button>
-        </div>
+    <!-- Topo: Menu de usuário e depósitos -->
+    <header class="top-nav">
+      <div class="user-badge" onclick="abrirModal('modal-auth')">
+        <span class="user-icon">👤</span>
+        <span id="user-display-name">Entrar</span>
       </div>
-
-      <div class="mascot-wrapper">
-        <div class="tiger-mascot">🐯</div>
-        <div class="vegas-badge">VEGAS 777</div>
-      </div>
-
-      <div class="logo-banner">
-        <span class="sub-title">SLOT ONLINE REAL</span>
-        <h1 class="main-title">FORTUNE TIGER</h1>
+      <div class="nav-actions">
+        <button class="nav-btn deposit" onclick="abrirModal('modal-deposit')">+ DEPOSITAR</button>
+        <button class="nav-btn withdraw" onclick="abrirModal('modal-withdraw')">SAQUE</button>
       </div>
     </header>
 
+    <!-- Estrutura do Templo com o Mascote no Topo -->
+    <div class="pagoda-header">
+      <div class="pagoda-roof">
+        <div class="roof-tiles"></div>
+      </div>
+      <div class="mascot-stage">
+        <div class="tiger-character">
+          <div class="tiger-face">🐯</div>
+          <div class="tiger-tag">WILD 10X</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Moldura Principal do Jogo 3x3 -->
     <main class="slot-machine">
-      <div class="temple-frame">
-        <div class="line-indicators left">
-          <span class="indicator">1</span><span class="indicator">2</span><span class="indicator">3</span>
+      <div class="pg-frame">
+        <div class="pillar left">
+          <span class="line-num">1</span>
+          <span class="line-num">2</span>
+          <span class="line-num">3</span>
         </div>
 
         <div class="grid-3x3">
           <div class="cell" id="c00"><div class="symbol-wrapper">🐯</div></div>
-          <div class="cell" id="c01"><div class="symbol-wrapper">🎰</div></div>
-          <div class="cell" id="c02"><div class="symbol-wrapper">💎</div></div>
-          <div class="cell" id="c10"><div class="symbol-wrapper">🍒</div></div>
+          <div class="cell" id="c01"><div class="symbol-wrapper">🏺</div></div>
+          <div class="cell" id="c02"><div class="symbol-wrapper">🟢</div></div>
+          <div class="cell" id="c10"><div class="symbol-wrapper">🧧</div></div>
           <div class="cell" id="c11"><div class="symbol-wrapper">🐯</div></div>
           <div class="cell" id="c12"><div class="symbol-wrapper">🪙</div></div>
           <div class="cell" id="c20"><div class="symbol-wrapper">💎</div></div>
@@ -51,48 +56,54 @@
           <div class="cell" id="c22"><div class="symbol-wrapper">🎰</div></div>
         </div>
 
-        <div class="line-indicators right">
-          <span class="indicator">4</span><span class="indicator">5</span>
+        <div class="pillar right">
+          <span class="line-num">4</span>
+          <span class="line-num">5</span>
         </div>
       </div>
     </main>
 
-    <div class="status-banner">
-      <span id="banner-text">Conecte sua rede social para vincular seu saldo e jogar!</span>
+    <!-- Banner Central de Mensagens do Tigre -->
+    <div class="fortune-banner">
+      <span id="banner-text">Sorte do Tigre! Faça sua jogada!</span>
     </div>
 
+    <!-- Rodapé: Carteira, Aposta e Botão de Giro Circular -->
     <footer class="footer-panel">
       <div class="stats-ribbon">
         <div class="stat-box">
-          <span class="stat-label">SALDO DISPONÍVEL</span>
+          <span class="stat-label">SALDO</span>
           <span class="stat-value" id="saldo">R$ 0,00</span>
         </div>
         <div class="stat-box highlight">
-          <span class="stat-label">APOSTA (MÍN R$ 1)</span>
+          <span class="stat-label">APOSTA</span>
           <span class="stat-value" id="aposta-display">R$ 1,00</span>
         </div>
         <div class="stat-box win">
-          <span class="stat-label">PRÊMIO</span>
+          <span class="stat-label">GANHO</span>
           <span class="stat-value" id="win-display">R$ 0,00</span>
         </div>
       </div>
 
-      <div class="action-controls">
+      <div class="pg-controls">
         <button class="btn-step" onclick="alterarAposta(-1.00)">-</button>
-        <button id="btn-spin" onclick="girar()">
-          <span class="spin-text">GIRAR</span>
+        <button id="btn-spin" class="btn-spin-circular" onclick="girar()">
+          <div class="spin-inner">
+            <span class="spin-icon">⚡</span>
+            <span class="spin-text">GIRAR</span>
+          </div>
         </button>
         <button class="btn-step" onclick="alterarAposta(1.00)">+</button>
       </div>
     </footer>
   </div>
 
-  <!-- Modal Login Social Exclusivo (Google, Instagram e Facebook) -->
+  <!-- Modal Login Social (Google, Instagram, Facebook) -->
   <div class="modal-overlay" id="modal-auth">
     <div class="modal-content">
       <button class="modal-close" onclick="fecharModal('modal-auth')">✕</button>
       <h2>ENTRAR / CADASTRAR</h2>
-      <p class="auth-sub">Conecte sua conta para vincular seu saldo de jogo</p>
+      <p class="auth-sub">Conecte sua conta social para vincular seu saldo de jogo</p>
 
       <button class="btn-social google" onclick="loginSocial('Google')">
         <span class="social-icon">🌐</span> Continuar com Google
